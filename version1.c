@@ -2,12 +2,13 @@
  \file
  \page Général
 
- \author GOURDON Gabriel
+ \author GOURDON Gabriel & PASSEREAU Elouan
  \version 1.0
- \date 22 octobre 2024
- \brief Un snake pour la SAE 1.01
+ \date 12 décembre 2024
+ \brief Un snake pour la SAE 1.02 Algorithmique
 **/
 
+// Bibliotèques
 #include <fcntl.h>
 #include <unistd.h>
 #include <termios.h>
@@ -15,6 +16,8 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <time.h>
+
+#include "defconst.h"
 
 
 typedef char t_plateau[TAILLE_TABLEAU_Y][TAILLE_TABLEAU_X];
@@ -156,7 +159,7 @@ void initPlateau()
 		{
 			// Placer des bordures sur les bords du tableau
             if (i == 1 || i == TAILLE_TABLEAU_Y - 1 || j == 1 || j == TAILLE_TABLEAU_X - 1) {
-                tableau[i][j] = CHAR_OBSTACLE;  // Bordure
+                tableau[i][j] = CHAR_BORDURE;  // Bordure
             } else {
                 tableau[i][j] = CHAR_VIDE;  // Espace vide à l'intérieur
             }
