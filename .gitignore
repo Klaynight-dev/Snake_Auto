@@ -6,6 +6,7 @@
 *.ko
 *.obj
 *.elf
+./ov[0-9]
 
 # Linker output
 *.ilk
