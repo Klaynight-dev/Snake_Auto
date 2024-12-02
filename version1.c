@@ -17,6 +17,8 @@
 #include <stdbool.h>
 #include <time.h>
 
+#include "defconst.h"
+
 // Déclaration des constantes
 /**
  * \def TAILLE_TABLEAU
