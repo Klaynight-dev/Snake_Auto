@@ -133,6 +133,7 @@
 /************************************************
  *                                              *
  *          Définition des fonctions            *
+ *                                              *
  ************************************************/
 // Déclaration des fonctions fournies
 void gotoXY(int x, int y);
