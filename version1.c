@@ -4,7 +4,7 @@
 
  \author GOURDON Gabriel & PASSEREAU Elouan
  \version 1.0
- \date 12 décembre 2024
+ \date last 12 décembre 2024
  \brief Un snake pour la SAE 1.02 Algorithmique
 **/
 
@@ -54,8 +54,6 @@ int main()
 
 	serpentDansTab(positionsX, positionsY);
     srand(time(NULL)); // Initialiser l'aléatoire
-
-    genererPaves(positionsX, positionsY);
 
     dessinerPlateau(); // Afficher le tableau de jeu initial
 	ajouterPomme(nbPommesMangees);
@@ -309,62 +307,6 @@ void genererSerpent(int positionsX[TAILLE_MAX_SERPENT], int positionsY[TAILLE_MA
 	{
 		positionsX[nbCellule] = x - nbCellule;
 		positionsY[nbCellule] = y;
-	}
-}
-
-/*!
- \fn void genererPaves(int posSerpentX[TAILLE_SERPENT], int posSerpentY[TAILLE_SERPENT])
- \brief La fonction qui génère les pavés
- \param positionsX La liste des positionsX du serpent
- \param positionsY La liste des positionsY du serpent
-
-Cette fonction créé NOMBRE_PAVES pavés en utilisant la fonction genererUnPave
-*/
-void genererPaves(int posSerpentX[TAILLE_MAX_SERPENT], int posSerpentY[TAILLE_MAX_SERPENT])
-{
-	for(int i = 0; i < NOMBRE_PAVES; i++)
-	{
-		genererUnPave(posSerpentX, posSerpentY);
-	}
-}
-
-/*!
- \fn void genererPaves(int posSerpentX[TAILLE_SERPENT], int posSerpentY[TAILLE_SERPENT])
- \brief La fonction qui génère un pavé
- \param positionsX La liste des positionsX du serpent
- \param positionsY La liste des positionsY du serpent
-
-Cette fonction génère un pavé de dimensions TAILLE_PAVE_X et TAILLE_PAVE_Y en utilisant la fonction genererEntierDansBornes
-puis vérifie sa validité par rapport au serpent et aux bordures
-*/
-void genererUnPave(int posSerpentX[TAILLE_MAX_SERPENT], int posSerpentY[TAILLE_MAX_SERPENT])
-{
-	int paveX, paveY;
-	bool paveValide = false;
-	while (!paveValide)
-	{
-		paveX = genererEntierDansBornes(2, TAILLE_TABLEAU_X - 2); // -2 : un caractère de bord et un caractère pour l'espace
-		paveY = genererEntierDansBornes(2, TAILLE_TABLEAU_Y - 2); // entre le bord et le pavé, que le serpent puisse passer
-		paveValide = true;
-
-		for (int x = -2; x < TAILLE_PAVE_X +1; x++) // Vérifier que le pavé ne superpose rien
-		{
-			for(int y = -2; y < TAILLE_PAVE_Y +1; y++)
-			{
-				if(tableau[paveY + y][paveX + x] != CHAR_VIDE)
-				{
-					paveValide = false;
-				}
-			}
-		}
-	}
-
-	for (int x = 0; x < TAILLE_PAVE_X; x++) // Mettre le pavé validé dans le tableau
-	{
-		for(int y = 0; y < TAILLE_PAVE_Y; y++)
-		{
-			tableau[paveY + y][paveX + x] = CHAR_OBSTACLE;
-		}
 	}
 }
 
