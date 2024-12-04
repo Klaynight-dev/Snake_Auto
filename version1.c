@@ -16,14 +16,17 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <time.h>
+#include <math.h>
 
 #include "defconst.h"
 
 t_plateau tableau;
 int tailleSerpent = TAILLE_SERPENT;
 int vitesseJeu = VITESSE_JEU_INITIALE;
-int lesPommesX[NB_POMMES] = {75, 75, 78, 2, 8, 78, 74, 2, 72, 5};
+int lesPommesX[NB_POMMES] = {50, 75, 78, 2, 8, 78, 74, 2, 72, 5};
 int lesPommesY[NB_POMMES] = {8, 39, 2, 2, 5, 39, 33, 38, 35, 2};
+int pommeDetecX = 0;
+int pommeDetecY = 0;
 int nbPommesMangees = 0; // On traque combien de pommes on mange pour pouvoir faire apparaitre la bonne une fois mangée
 
 
@@ -57,6 +60,7 @@ int main()
 
     dessinerPlateau(); // Afficher le tableau de jeu initial
 	ajouterPomme(nbPommesMangees);
+	detecterPomme(&pommeDetecX, &pommeDetecY);
     disableEcho();
 
     while (!devraitQuitter) // Boucle du jeu
@@ -74,7 +78,7 @@ int main()
             devraitQuitter = true; // Si la touche d'arrêt est pressée, quitter
         }
 		
-        changerDirection(&direction); // Met à jour la direction du serpent
+        changerDirection(&direction, positionsX, positionsY); // Met à jour la direction du serpent
 
         effacerSerpent(positionsX, positionsY); // Effacer le serpent avant de le déplacer
 
@@ -84,6 +88,7 @@ int main()
 		serpentDansTab(positionsX, positionsY); 
 
         dessinerPlateau(); // Redessiner le tableau de jeu avec le serpent mis à jour
+		detecterPomme(&pommeDetecX, &pommeDetecY); // TODO : Optimiser pour que ça détecte pas chaque frame
     }
 
     enableEcho(); // Réactiver l'écho
@@ -165,29 +170,32 @@ void effacerSerpent(int positionsX[TAILLE_MAX_SERPENT], int positionsY[TAILLE_MA
  *
  * Met le curseur aux coordonnées x et y passées en paramètre d'entrée
  */
-void changerDirection(char* direction)
+void changerDirection(char* direction, int positionsX[TAILLE_MAX_SERPENT], int positionsY[TAILLE_MAX_SERPENT])
 {
-	char ch; // Le serpent peut maintenant faire demi-tour sur lui-même
-	if(kbhit())
-	{
-		ch = getchar();
-	}
-	if (ch == TOUCHE_DROITE)
-	{
-		*direction = TOUCHE_DROITE;
-	}
-	if (ch == TOUCHE_HAUT)
-	{
-		*direction = TOUCHE_HAUT;
-	}
-	if (ch == TOUCHE_GAUCHE)
-	{
-		*direction = TOUCHE_GAUCHE;
-	}
-	if (ch == TOUCHE_BAS)
-	{
-		*direction = TOUCHE_BAS;
-	}
+	// char ch; // Le serpent peut maintenant faire demi-tour sur lui-même
+	// if(kbhit())
+	// {
+	// 	ch = getchar();
+	// }
+	// if (ch == TOUCHE_DROITE)
+	// {
+	// 	*direction = TOUCHE_DROITE;
+	// }
+	// if (ch == TOUCHE_HAUT)
+	// {
+	// 	*direction = TOUCHE_HAUT;
+	// }
+	// if (ch == TOUCHE_GAUCHE)
+	// {
+	// 	*direction = TOUCHE_GAUCHE;
+	// }
+	// if (ch == TOUCHE_BAS)
+	// {
+	// 	*direction = TOUCHE_BAS;
+	// }
+
+	*direction = trouverDirectionOptimale(positionsX[0], positionsY[0], *direction);
+
 }
 /*!
  \fn int checkAKeyPress()
@@ -417,6 +425,7 @@ void progresser(int positionsX[TAILLE_MAX_SERPENT], int positionsY[TAILLE_MAX_SE
 		// vitesseJeu -= ACCEL_SERPENT;
 		nbPommesMangees++;
 		ajouterPomme(nbPommesMangees);
+
 		// positionsX[tailleSerpent - 1] = positionsX[tailleSerpent - 2];
 		// positionsY[tailleSerpent - 1] = positionsY[tailleSerpent - 2];
 		// tableau[positionsY[tailleSerpent - 1]][positionsX[tailleSerpent - 1]] = CHAR_CORPS;
@@ -511,8 +520,6 @@ void quitterJeu()
 	printf("Au revoir !\n");
 }
 
-
-
 /**
  * \fn void gotoXY(int x, int y) 
  * \brief Met le curseur aux coordonnées x et y
@@ -535,4 +542,76 @@ Retourne un entier aleatoire entre min et max
 int genererEntierDansBornes(int min, int max)
 {
 	return (rand() % (max - min + 1)) + min;
+}
+
+void detecterPomme(int* pommeX, int* pommeY)
+{
+	for (int i = 0; i < TAILLE_TABLEAU_Y; i++)
+	{
+		for (int j = 0; j < TAILLE_TABLEAU_X; j++)
+		{
+			if (tableau[i][j] == CHAR_POMME)
+			{
+				*pommeX = j;
+				*pommeY = i;
+				return;
+			}
+		}
+	}
+}
+
+
+// La fonction utilise le théorème de Pythagore pour trouver la distance entre la tête du serpent et la pomme,
+// Puis la compare avec la distance possible avec chacune des 4 directions en prochain mouvement possible
+// Et retourne, sous la forme d'un char, le déplacement optimal (cette fonction ne traîte pas le cas de deux distances égales)
+// Cette fonction n'anticipe pas les prochains mouvements
+char trouverDirectionOptimale(int xTete, int yTete, char directionActuelle)
+{
+	if(pommeDetecY != yTete)
+	{
+		if(pommeDetecY > yTete)
+		{
+			return TOUCHE_BAS;
+		}
+		else if(pommeDetecY < yTete)
+		{
+			return TOUCHE_HAUT;
+		}
+	}
+	else
+	{
+		if(pommeDetecX != xTete)
+		{
+			if(pommeDetecX > xTete)
+			{
+				return TOUCHE_DROITE;
+			}
+			else if(pommeDetecX < xTete)
+			{
+				return TOUCHE_GAUCHE;
+			}
+		}
+	}
+
+
+
+	return directionActuelle;
+
+	// TODO : Régler ça
+	// int distancePommeTete = sqrt(pow(xTete - pommeDetecX, 2) + pow(yTete - pommeDetecY, 2));// La racine de (la distance X^2 + distance Y^2)
+
+	// int distanceDroite = sqrt(pow(xTete + 1 - pommeDetecX, 2) + pow(yTete - pommeDetecY, 2)); // On calcule toutes les nouvelles distances
+	// int distanceGauche = sqrt(pow(xTete - 1 - pommeDetecX, 2) + pow(yTete - pommeDetecY, 2));
+	// int distanceHaut = sqrt(pow(xTete - pommeDetecX, 2) + pow(yTete - 1 - pommeDetecY, 2));
+	// int distanceBas = sqrt(pow(xTete - pommeDetecX, 2) + pow(yTete + 1 - pommeDetecY, 2));	
+
+	// if (distancePommeTete >= distanceDroite)
+	// 	return TOUCHE_DROITE;
+	// if (distancePommeTete >= distanceGauche)
+	// 	return TOUCHE_GAUCHE;
+	// if (distancePommeTete >= distanceHaut)
+	// 	return TOUCHE_HAUT;
+	// if (distancePommeTete >= distanceBas)
+	// 	return TOUCHE_BAS;
+	// return directionActuelle; // Si aucune distance n'est inférieure, on retourne simplement la direction actuelle
 }

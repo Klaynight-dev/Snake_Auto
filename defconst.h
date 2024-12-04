@@ -138,29 +138,29 @@
 // Déclaration des fonctions fournies
 void gotoXY(int x, int y);
 // Déclaration des fonctions demandées
-void afficher(int x, int y, char c);																// Check
-void effacer(int x, int y);																			// Check
-void effacerEcran();																				// Check
+void afficher(int x, int y, char c);
+void effacer(int x, int y);			
+void effacerEcran();				
 
 int kbhit();
 void enableEcho();
 void disableEcho();
 
 // Déclaration des fonctions demandées
-void afficher(int x, int y, char c);																// Check
-void effacer(int x, int y);																			// Check
-void effacerEcran();																				// Check
+void afficher(int x, int y, char c);
+void effacer(int x, int y);			
+void effacerEcran();				
 
 int checkAKeyPress();
-void genererSerpent(int positionsX[TAILLE_MAX_SERPENT], int positionsY[TAILLE_MAX_SERPENT], int x, int y);	// Check
-void initPlateau();									// Check
-void dessinerPlateau();								// Check
-void afficherSerpent(int positionsX[TAILLE_MAX_SERPENT], int positionsY[TAILLE_MAX_SERPENT]);				// Check
+void genererSerpent(int positionsX[TAILLE_MAX_SERPENT], int positionsY[TAILLE_MAX_SERPENT], int x, int y);
+void initPlateau();	
+void dessinerPlateau();
+void afficherSerpent(int positionsX[TAILLE_MAX_SERPENT], int positionsY[TAILLE_MAX_SERPENT]);
 void effacerSerpent(int positionsX[TAILLE_MAX_SERPENT], int positionsY[TAILLE_MAX_SERPENT]);
-void progresser(int positionsX[TAILLE_MAX_SERPENT], int positionsY[TAILLE_MAX_SERPENT], char direction, bool* detecCollision);	// Check
+void progresser(int positionsX[TAILLE_MAX_SERPENT], int positionsY[TAILLE_MAX_SERPENT], char direction, bool* detecCollision);
 void serpentDansTab(int positionsX[TAILLE_MAX_SERPENT], int positionsY[TAILLE_MAX_SERPENT]);
 
-void changerDirection(char* direction);																// Check
+void changerDirection(char* direction, int positionsX[TAILLE_MAX_SERPENT], int positionsY[TAILLE_MAX_SERPENT]);	
 int genererEntierDansBornes(int min, int max);
 void genererPaves(int positionsX[TAILLE_MAX_SERPENT], int positionsY[TAILLE_MAX_SERPENT]);
 void genererUnPave(int positionsX[TAILLE_MAX_SERPENT], int positionsY[TAILLE_MAX_SERPENT]);
@@ -170,4 +170,10 @@ void succesJeu();
 void echecJeu();
 void quitterJeu();
 
+void detecterPomme(int* pommeX, int* pommeY);
+
+char trouverDirectionOptimale(int xTete, int yTete, char directionActuelle);
+
 typedef char t_plateau[TAILLE_TABLEAU_Y][TAILLE_TABLEAU_X];
+
+
