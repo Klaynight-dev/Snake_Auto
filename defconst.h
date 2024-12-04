@@ -4,8 +4,8 @@
  * \def TAILLE_TABLEAU
  * \brief La taille du tableau dans lequel le serpent va évoluer
  */
-#define TAILLE_TABLEAU_X 80
-#define TAILLE_TABLEAU_Y 40
+#define TAILLE_TABLEAU_X 81
+#define TAILLE_TABLEAU_Y 41
 
 /**
  * \def TAILLE_SERPENT
@@ -127,3 +127,46 @@
 #define ACCEL_SERPENT 15000
 
 #define NB_POMMES 10
+
+#define CHAR_BORDURE '#'
+
+/************************************************
+ *                                              *
+ *          Définition des fonctions            *
+ ************************************************/
+// Déclaration des fonctions fournies
+void gotoXY(int x, int y);
+// Déclaration des fonctions demandées
+void afficher(int x, int y, char c);																// Check
+void effacer(int x, int y);																			// Check
+void effacerEcran();																				// Check
+
+int kbhit();
+void enableEcho();
+void disableEcho();
+
+// Déclaration des fonctions demandées
+void afficher(int x, int y, char c);																// Check
+void effacer(int x, int y);																			// Check
+void effacerEcran();																				// Check
+
+int checkAKeyPress();
+void genererSerpent(int positionsX[TAILLE_MAX_SERPENT], int positionsY[TAILLE_MAX_SERPENT], int x, int y);	// Check
+void initPlateau();									// Check
+void dessinerPlateau();								// Check
+void afficherSerpent(int positionsX[TAILLE_MAX_SERPENT], int positionsY[TAILLE_MAX_SERPENT]);				// Check
+void effacerSerpent(int positionsX[TAILLE_MAX_SERPENT], int positionsY[TAILLE_MAX_SERPENT]);
+void progresser(int positionsX[TAILLE_MAX_SERPENT], int positionsY[TAILLE_MAX_SERPENT], char direction, bool* detecCollision);	// Check
+void serpentDansTab(int positionsX[TAILLE_MAX_SERPENT], int positionsY[TAILLE_MAX_SERPENT]);
+
+void changerDirection(char* direction);																// Check
+int genererEntierDansBornes(int min, int max);
+void genererPaves(int positionsX[TAILLE_MAX_SERPENT], int positionsY[TAILLE_MAX_SERPENT]);
+void genererUnPave(int positionsX[TAILLE_MAX_SERPENT], int positionsY[TAILLE_MAX_SERPENT]);
+void genererTrous();
+void ajouterPomme(int indice);
+void succesJeu();
+void echecJeu();
+void quitterJeu();
+
+typedef char t_plateau[TAILLE_TABLEAU_Y][TAILLE_TABLEAU_X];

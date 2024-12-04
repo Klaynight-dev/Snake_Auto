@@ -19,50 +19,12 @@
 
 #include "defconst.h"
 
-
-typedef char t_plateau[TAILLE_TABLEAU_Y][TAILLE_TABLEAU_X];
-
 t_plateau tableau;
 int tailleSerpent = TAILLE_SERPENT;
 int vitesseJeu = VITESSE_JEU_INITIALE;
 int lesPommesX[NB_POMMES] = {75, 75, 78, 2, 8, 78, 74, 2, 72, 5};
 int lesPommesY[NB_POMMES] = {8, 39, 2, 2, 5, 39, 33, 38, 35, 2};
-
-
-// Déclaration des fonctions fournies
-void gotoXY(int x, int y);
-// Déclaration des fonctions demandées
-void afficher(int x, int y, char c);																// Check
-void effacer(int x, int y);																			// Check
-void effacerEcran();																				// Check
-
-int kbhit();
-void enableEcho();
-void disableEcho();
-
-// Déclaration des fonctions demandées
-void afficher(int x, int y, char c);																// Check
-void effacer(int x, int y);																			// Check
-void effacerEcran();																				// Check
-
-int checkAKeyPress();
-void genererSerpent(int positionsX[TAILLE_MAX_SERPENT], int positionsY[TAILLE_MAX_SERPENT], int x, int y);	// Check
-void initPlateau();									// Check
-void dessinerPlateau();								// Check
-void afficherSerpent(int positionsX[TAILLE_MAX_SERPENT], int positionsY[TAILLE_MAX_SERPENT]);				// Check
-void effacerSerpent(int positionsX[TAILLE_MAX_SERPENT], int positionsY[TAILLE_MAX_SERPENT]);
-void progresser(int positionsX[TAILLE_MAX_SERPENT], int positionsY[TAILLE_MAX_SERPENT], char direction, bool* detecCollision);	// Check
-void serpentDansTab(int positionsX[TAILLE_MAX_SERPENT], int positionsY[TAILLE_MAX_SERPENT]);
-
-void changerDirection(char* direction);																// Check
-int genererEntierDansBornes(int min, int max);
-void genererPaves(int positionsX[TAILLE_MAX_SERPENT], int positionsY[TAILLE_MAX_SERPENT]);
-void genererUnPave(int positionsX[TAILLE_MAX_SERPENT], int positionsY[TAILLE_MAX_SERPENT]);
-void genererTrous();
-void ajouterPomme();
-void succesJeu();
-void echecJeu();
-void quitterJeu();
+int nbPommesMangees = 0; // On traque combien de pommes on mange pour pouvoir faire apparaitre la bonne une fois mangée
 
 
 /**
@@ -96,7 +58,7 @@ int main()
     genererPaves(positionsX, positionsY);
 
     dessinerPlateau(); // Afficher le tableau de jeu initial
-	ajouterPomme();
+	ajouterPomme(nbPommesMangees);
     disableEcho();
 
     while (!devraitQuitter) // Boucle du jeu
@@ -207,24 +169,24 @@ void effacerSerpent(int positionsX[TAILLE_MAX_SERPENT], int positionsY[TAILLE_MA
  */
 void changerDirection(char* direction)
 {
-	char ch;
+	char ch; // Le serpent peut maintenant faire demi-tour sur lui-même
 	if(kbhit())
 	{
 		ch = getchar();
 	}
-	if (ch == TOUCHE_DROITE && *direction != TOUCHE_GAUCHE)
+	if (ch == TOUCHE_DROITE)
 	{
 		*direction = TOUCHE_DROITE;
 	}
-	if (ch == TOUCHE_HAUT && *direction != TOUCHE_BAS)
+	if (ch == TOUCHE_HAUT)
 	{
 		*direction = TOUCHE_HAUT;
 	}
-	if (ch == TOUCHE_GAUCHE && *direction != TOUCHE_DROITE)
+	if (ch == TOUCHE_GAUCHE)
 	{
 		*direction = TOUCHE_GAUCHE;
 	}
-	if (ch == TOUCHE_BAS && *direction != TOUCHE_HAUT)
+	if (ch == TOUCHE_BAS)
 	{
 		*direction = TOUCHE_BAS;
 	}
@@ -315,16 +277,16 @@ void effacerEcran()
 
  Génère deux coordonnées, et si le caractère de la case correspondante est CHAR_VIDE, ajoute une pomme et affiche le caractère CHAR_POMME, sinon, recommence
 */
-void ajouterPomme()
+void ajouterPomme(int indice)
 {
 	int x, y;
-	x = (rand() % TAILLE_TABLEAU_X - 2) + 2;
-	y = (rand() % TAILLE_TABLEAU_Y - 2) + 2;
-	while (tableau[y][x] != CHAR_VIDE)
-	{
-		x = (rand() % TAILLE_TABLEAU_X - 2) + 2;
-		y = (rand() % TAILLE_TABLEAU_Y - 2) + 2;
-	}
+	x = lesPommesX[indice];
+	y = lesPommesY[indice];
+	// while (tableau[y][x] != CHAR_VIDE)
+	// {
+	// 	x = (rand() % TAILLE_TABLEAU_X - 2) + 2;
+	// 	y = (rand() % TAILLE_TABLEAU_Y - 2) + 2;
+	// }
 	tableau[y][x] = CHAR_POMME;
 	afficher(x, y, CHAR_POMME);
 	fflush(stdout);
@@ -494,7 +456,7 @@ void progresser(int positionsX[TAILLE_MAX_SERPENT], int positionsY[TAILLE_MAX_SE
         *detecCollision = true; // Collision avec le bord
     }
 
-	if(nouveauX < 1 && direction == TOUCHE_GAUCHE && (nouveauY == TAILLE_TABLEAU_Y / 2))
+	if(nouveauX < 1 && direction == TOUCHE_GAUCHE && (nouveauY == TAILLE_TABLEAU_Y / 2)) // Détection des trous
 	{
 		nouveauX = TAILLE_TABLEAU_X - 1;
 	}
@@ -507,24 +469,25 @@ void progresser(int positionsX[TAILLE_MAX_SERPENT], int positionsY[TAILLE_MAX_SE
     // Vérifier si la nouvelle position est en collision avec une pomme
     if (tableau[nouveauY][nouveauX] == CHAR_POMME)
     {
-        // Si le serpent a mangé une pomme, on augmente la taille du serpent, on rajoute une pomme et on met la cellule n-1
-		// du serpent à la valeur de n-2
-		tailleSerpent++; // Augmenter la taille du serpent
-		vitesseJeu -= ACCEL_SERPENT;
-		ajouterPomme(positionsX, positionsY);
-		positionsX[tailleSerpent - 1] = positionsX[tailleSerpent - 2];
-		positionsY[tailleSerpent - 1] = positionsY[tailleSerpent - 2];
-		tableau[positionsY[tailleSerpent - 1]][positionsX[tailleSerpent - 1]] = CHAR_CORPS;
+        // Si le serpent a mangé une pomme, on rajoute une pomme selon le tableau de pommes
+
+		// tailleSerpent++;
+		// vitesseJeu -= ACCEL_SERPENT;
+		nbPommesMangees++;
+		ajouterPomme(nbPommesMangees);
+		// positionsX[tailleSerpent - 1] = positionsX[tailleSerpent - 2];
+		// positionsY[tailleSerpent - 1] = positionsY[tailleSerpent - 2];
+		// tableau[positionsY[tailleSerpent - 1]][positionsX[tailleSerpent - 1]] = CHAR_CORPS;
     }
 
     // Vérifier si la nouvelle position de la tête entre en collision avec le corps du serpent
-    for (int i = 1; i < tailleSerpent; i++)
-	{
-		if (positionsX[i] == nouveauX && positionsY[i] == nouveauY)
-		{
-            *detecCollision = true; // Collision avec le serpent
-        }
-    }
+    // for (int i = 1; i < tailleSerpent; i++)
+	// {
+	// 	if (positionsX[i] == nouveauX && positionsY[i] == nouveauY)
+	// 	{
+    //         *detecCollision = true; // Collision avec le serpent
+    //     }
+    // }
 
     // Déplacer le corps du serpent en décalant chaque segment vers la position du segment précédent
     for (int i = tailleSerpent - 1; i > 0; i--)
