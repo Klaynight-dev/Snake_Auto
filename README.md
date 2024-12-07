@@ -77,7 +77,8 @@ Les contributions sont les bienvenues ! Veuillez suivre les étapes ci-dessous p
 
 ### Auteurs
 
-- **Klaynight-dev** - *Créateur initial* - [Klaynight-dev](https://github.com/Klaynight-dev)
+- **Klaynight-dev** - *Propriétaire du repo & Co-Créateur initial* - [Klaynight-dev](https://github.com/Klaynight-dev)
+- **QuartzWasTaken** - *Co-Créateur initial* - [QuartzWasTaken](https://github.com/QuartzWasTaken)
 
 ### Licence
 
