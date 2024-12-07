@@ -28,6 +28,9 @@ int lesPommesY[NB_POMMES] = {8, 39, 2, 2, 5, 39, 33, 38, 35, 2};
 int pommeDetecX = 0;
 int pommeDetecY = 0;
 int nbPommesMangees = 0; // On traque combien de pommes on mange pour pouvoir faire apparaitre la bonne une fois mangée
+int nbrMouvements = 0;
+int tempsCPUDepart = 0;
+int tempsCPUFin = 0;
 
 
 /**
@@ -47,6 +50,8 @@ int main()
 	bool aQuitte = false;
 	bool estMort = false;
 	bool aGagne = false;
+	tempsCPUDepart = clock(); // Calculer le temps CPU utilisé
+
 
 	x = X_DEBUT;
 	y = Y_DEBUT;
@@ -68,9 +73,12 @@ int main()
         usleep(vitesseJeu);
 
 		aQuitte = checkAKeyPress(); // Si l'utilisateur veut quitter, mettre aQuitte = true
-		if(tailleSerpent >= TAILLE_MAX_SERPENT)
-		{
-			aGagne = true; // Si la taille de l'utilisateur dépasse la taille maximale autorisée, il a gagné
+		
+		// if(tailleSerpent >= TAILLE_MAX_SERPENT)
+		// {aGagne = true;} // Si la taille de l'utilisateur dépasse la taille maximale autorisée, il a gagné
+
+		if (nbPommesMangees == NB_POMMES) { // Si l'utilisateur a mangé toutes les pommes, il a gagné 
+			aGagne = true;
 		}
 
         if (checkAKeyPress() || estMort || aGagne)
@@ -381,21 +389,25 @@ void progresser(int positionsX[TAILLE_MAX_SERPENT], int positionsY[TAILLE_MAX_SE
 
     // Calculer la nouvelle position de la tête en fonction de la direction
     switch (direction) {
-        case TOUCHE_DROITE:
+		case TOUCHE_DROITE:
 			nouveauX++;
+			nbrMouvements++;
 			break;
-        case TOUCHE_HAUT:
+		case TOUCHE_HAUT:
 			nouveauY--;
+			nbrMouvements++;
 			break;
-        case TOUCHE_GAUCHE:
+		case TOUCHE_GAUCHE:
 			nouveauX--;
+			nbrMouvements++;
 			break;
-        case TOUCHE_BAS:
+		case TOUCHE_BAS:
 			nouveauY++;
+			nbrMouvements++;
 			break;
 		default:
 			break;
-    }
+	}
 
 	nouveauX %= TAILLE_TABLEAU_X; // Wrap les positions
 	nouveauY %= TAILLE_TABLEAU_Y;
@@ -423,10 +435,13 @@ void progresser(int positionsX[TAILLE_MAX_SERPENT], int positionsY[TAILLE_MAX_SE
 
 		// tailleSerpent++;
 		// vitesseJeu -= ACCEL_SERPENT;
-		nbPommesMangees++;
-		ajouterPomme(nbPommesMangees);
 
-		// positionsX[tailleSerpent - 1] = positionsX[tailleSerpent - 2];
+		nbPommesMangees++;
+		if (nbPommesMangees < NB_POMMES) {
+			ajouterPomme(nbPommesMangees);
+		}
+
+		// positionsX[tailleSerpent - 1] = positionsX[tailleSerpent - 2]; // Ajouter un segment au serpent
 		// positionsY[tailleSerpent - 1] = positionsY[tailleSerpent - 2];
 		// tableau[positionsY[tailleSerpent - 1]][positionsX[tailleSerpent - 1]] = CHAR_CORPS;
     }
@@ -441,6 +456,8 @@ void progresser(int positionsX[TAILLE_MAX_SERPENT], int positionsY[TAILLE_MAX_SE
     // }
 
     // Déplacer le corps du serpent en décalant chaque segment vers la position du segment précédent
+
+
     for (int i = tailleSerpent - 1; i > 0; i--)
 	{
         positionsX[i] = positionsX[i - 1];
@@ -493,7 +510,10 @@ int kbhit()
 void succesJeu()
 {
 	system("clear");
+	tempsCPUFin = clock(); // Calculer le temps CPU utilisé
 	printf("Vous avez gagné, bravo !\n");
+	printf("Vous avez mis %d mouvements pour gagner\n", nbrMouvements);
+	printf("Vous avez mis %f secondes pour gagner\n", (double)(tempsCPUFin - tempsCPUDepart) / CLOCKS_PER_SEC);
 }
 
 /*!

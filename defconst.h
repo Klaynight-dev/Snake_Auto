@@ -18,7 +18,7 @@
  * \def VITESSE_JEU
  * \brief La vitesse à laquelle le jeu va avancer (en nanosecondes)
  */
-#define VITESSE_JEU_INITIALE 200000
+#define VITESSE_JEU_INITIALE 10000 // 200000
 
 /**
  * \def TOUCHE_ARRET
@@ -172,7 +172,9 @@ void quitterJeu();
 
 void detecterPomme(int* pommeX, int* pommeY);
 
-char trouverDirectionOptimale(int xTete, int yTete, char directionActuelle);
+char trouverDirectionOptimale(int xTete, int yTete, char directionActuelle); // Fonction qui trouve la direction optimale pour le serpent
+char choisirDirection(int xTete, int yTete, char directionActuelle); // Fonction qui choisit la direction du serpent
+int distanceCarree(int x1, int y1, int x2, int y2); // Fonction qui calcule la distance entre deux points
 
 typedef char t_plateau[TAILLE_TABLEAU_Y][TAILLE_TABLEAU_X];
 
