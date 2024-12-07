@@ -51,15 +51,7 @@ sudo apt install gcc make
 ### Structure du Projet
 
 ```
-.vscode/
-    c_cpp_properties.json
-    launch.json
-    settings.json
-build/
-    Debug/
-        version1.o
 defconst.h
-main
 propal2.c
 version1.c
 ```
