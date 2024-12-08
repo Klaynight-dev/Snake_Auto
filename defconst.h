@@ -18,7 +18,7 @@
  * \def VITESSE_JEU
  * \brief La vitesse à laquelle le jeu va avancer (en nanosecondes)
  */
-#define VITESSE_JEU_INITIALE 10000 // 200000
+#define VITESSE_JEU_INITIALE 200000
 
 /**
  * \def TOUCHE_ARRET
