@@ -6,6 +6,8 @@
  \version 1.0
  \date last 12 décembre 2024
  \brief Un snake pour la SAE 1.02 Algorithmique
+  Afin de demarer avec GCC sans erreur, il vous faut effectuer la commande si dessous : 
+ -> gcc ./version1.c -o main -Wall -lm
 **/
 
 // Bibliotèques
