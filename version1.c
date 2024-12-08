@@ -585,53 +585,26 @@ void detecterPomme(int* pommeX, int* pommeY)
 // Puis la compare avec la distance possible avec chacune des 4 directions en prochain mouvement possible
 // Et retourne, sous la forme d'un char, le déplacement optimal (cette fonction ne traîte pas le cas de deux distances égales)
 // Cette fonction n'anticipe pas les prochains mouvements
-char trouverDirectionOptimale(int xTete, int yTete, char directionActuelle)
-{
-	if(pommeDetecY != yTete)
-	{
-		if(pommeDetecY > yTete)
-		{
-			return TOUCHE_BAS;
-		}
-		else if(pommeDetecY < yTete)
-		{
-			return TOUCHE_HAUT;
-		}
-	}
-	else
-	{
-		if(pommeDetecX != xTete)
-		{
-			if(pommeDetecX > xTete)
-			{
-				return TOUCHE_DROITE;
-			}
-			else if(pommeDetecX < xTete)
-			{
-				return TOUCHE_GAUCHE;
-			}
-		}
-	}
+int distanceCarree(int x1, int y1, int x2, int y2) {
+    return (int)pow(x1 - x2, 2) + (int)pow(y1 - y2, 2); // Théorème de Pythagore
+}
 
+char choisirDirection(int xTete, int yTete, char directionActuelle) {
+    int distanceActuelle = distanceCarree(xTete, yTete, pommeDetecX, pommeDetecY);
 
+    int distanceDroite = distanceCarree(xTete + 1, yTete, pommeDetecX, pommeDetecY);
+    int distanceGauche = distanceCarree(xTete - 1, yTete, pommeDetecX, pommeDetecY);
+    int distanceHaut = distanceCarree(xTete, yTete - 1, pommeDetecX, pommeDetecY);
+    int distanceBas = distanceCarree(xTete, yTete + 1, pommeDetecX, pommeDetecY);
 
-	return directionActuelle;
+    if (distanceDroite < distanceActuelle)
+        return TOUCHE_DROITE;
+    if (distanceGauche < distanceActuelle)
+        return TOUCHE_GAUCHE;
+    if (distanceHaut < distanceActuelle)
+        return TOUCHE_HAUT;
+    if (distanceBas < distanceActuelle)
+        return TOUCHE_BAS;
 
-	// TODO : Régler ça
-	// int distancePommeTete = sqrt(pow(xTete - pommeDetecX, 2) + pow(yTete - pommeDetecY, 2));// La racine de (la distance X^2 + distance Y^2)
-
-	// int distanceDroite = sqrt(pow(xTete + 1 - pommeDetecX, 2) + pow(yTete - pommeDetecY, 2)); // On calcule toutes les nouvelles distances
-	// int distanceGauche = sqrt(pow(xTete - 1 - pommeDetecX, 2) + pow(yTete - pommeDetecY, 2));
-	// int distanceHaut = sqrt(pow(xTete - pommeDetecX, 2) + pow(yTete - 1 - pommeDetecY, 2));
-	// int distanceBas = sqrt(pow(xTete - pommeDetecX, 2) + pow(yTete + 1 - pommeDetecY, 2));	
-
-	// if (distancePommeTete >= distanceDroite)
-	// 	return TOUCHE_DROITE;
-	// if (distancePommeTete >= distanceGauche)
-	// 	return TOUCHE_GAUCHE;
-	// if (distancePommeTete >= distanceHaut)
-	// 	return TOUCHE_HAUT;
-	// if (distancePommeTete >= distanceBas)
-	// 	return TOUCHE_BAS;
-	// return directionActuelle; // Si aucune distance n'est inférieure, on retourne simplement la direction actuelle
+    return directionActuelle; // Si aucune direction n'est meilleure, continuer tout droit
 }
