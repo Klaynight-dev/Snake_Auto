@@ -172,7 +172,6 @@ void quitterJeu();
 
 void detecterPomme(int* pommeX, int* pommeY);
 
-char trouverDirectionOptimale(int xTete, int yTete, char directionActuelle); // Fonction qui trouve la direction optimale pour le serpent
 char choisirDirection(int xTete, int yTete, char directionActuelle); // Fonction qui choisit la direction du serpent
 int distanceCarree(int x1, int y1, int x2, int y2); // Fonction qui calcule la distance entre deux points
 
