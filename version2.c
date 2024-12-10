@@ -3,11 +3,11 @@
  \page Général
 
  \author GOURDON Gabriel & PASSEREAU Elouan
- \version 1.0
+ \version 2.0
  \date last 12 décembre 2024
- \brief Un snake pour la SAE 1.02 Algorithmique
-  Afin de demarer avec GCC sans erreur, il vous faut effectuer la commande si dessous : 
- -> gcc ./version1.c -o main -Wall -lm
+ \brief Un snake pour la SAE 1.02 Comparaison d'Approches Algorithmiques
+  Afin de démarrer avec GCC sans erreur, il vous faut effectuer la commande si dessous : 
+ -> gcc ./version2.c -Wall -lm
 **/
 
 // Bibliotèques
@@ -204,7 +204,7 @@ void changerDirection(char* direction, int positionsX[TAILLE_MAX_SERPENT], int p
 	// 	*direction = TOUCHE_BAS;
 	// }
 
-	*direction = trouverDirectionOptimale(positionsX[0], positionsY[0], *direction);
+	*direction = choisirDirection(positionsX[0], positionsY[0], *direction);
 
 }
 /*!
