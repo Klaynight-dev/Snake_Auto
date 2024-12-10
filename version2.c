@@ -140,7 +140,7 @@ void initPlateau()
             }
 		}
 	}
-	// genererTrous(); On ne fait aps de trous dans la version 1
+	genererTrous();
 }
 
 /**
