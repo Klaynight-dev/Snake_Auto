@@ -6,7 +6,7 @@
 *.ko
 *.obj
 *.elf
-./ov*
+ov*
 
 # Linker output
 *.ilk
