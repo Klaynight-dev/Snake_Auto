@@ -54,3 +54,6 @@ dkms.conf
 
 # Environment Folders
 .vscode
+
+# Other files
+*.txt
