@@ -130,6 +130,9 @@
 
 #define CHAR_BORDURE '#'
 
+#define MOITIE_HAUTEUR_TABLEAU (TAILLE_TABLEAU_Y / 2)
+#define MOITIE_LARGEUR_TABLEAU (TAILLE_TABLEAU_X / 2)
+
 /************************************************
  *                                              *
  *          Définition des fonctions            *
@@ -172,8 +175,10 @@ void quitterJeu();
 
 void detecterPomme(int* pommeX, int* pommeY);
 
-char choisirDirection(int xTete, int yTete, char directionActuelle); // Fonction qui choisit la direction du serpent
+char choisirDirection(int xTete, int yTete, char directionActuelle, int cibleX, int cibleY); // Fonction qui choisit la direction du serpent
 int distanceCarree(int x1, int y1, int x2, int y2); // Fonction qui calcule la distance entre deux points
+void determinerCible(int cible[2], int positionsX[TAILLE_MAX_SERPENT], int positionsY[TAILLE_MAX_SERPENT]);
+
 
 typedef char t_plateau[TAILLE_TABLEAU_Y][TAILLE_TABLEAU_X];
 

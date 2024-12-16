@@ -30,6 +30,7 @@ int lesPommesY[NB_POMMES] = {8, 39, 2, 2, 5, 39, 33, 38, 35, 2};
 int pommeDetecX = 0;
 int pommeDetecY = 0;
 int nbPommesMangees = 0; // On traque combien de pommes on mange pour pouvoir faire apparaitre la bonne une fois mangée
+
 int nbrMouvements = 0;
 int tempsCPUDepart = 0;
 int tempsCPUFin = 0;
@@ -182,30 +183,9 @@ void effacerSerpent(int positionsX[TAILLE_MAX_SERPENT], int positionsY[TAILLE_MA
  */
 void changerDirection(char* direction, int positionsX[TAILLE_MAX_SERPENT], int positionsY[TAILLE_MAX_SERPENT])
 {
-	// char ch; // Le serpent peut maintenant faire demi-tour sur lui-même
-	// if(kbhit())
-	// {
-	// 	ch = getchar();
-	// }
-	// if (ch == TOUCHE_DROITE)
-	// {
-	// 	*direction = TOUCHE_DROITE;
-	// }
-	// if (ch == TOUCHE_HAUT)
-	// {
-	// 	*direction = TOUCHE_HAUT;
-	// }
-	// if (ch == TOUCHE_GAUCHE)
-	// {
-	// 	*direction = TOUCHE_GAUCHE;
-	// }
-	// if (ch == TOUCHE_BAS)
-	// {
-	// 	*direction = TOUCHE_BAS;
-	// }
-
-	*direction = choisirDirection(positionsX[0], positionsY[0], *direction);
-
+	int cible[2]; // 0 = X 1 =void	determinerCible(cible, positionsX, positionsY);
+	determinerCible(cible, positionsX, positionsY);
+	*direction = choisirDirection(positionsX[0], positionsY[0], *direction, cible[0], cible[1]);
 }
 /*!
  \fn int checkAKeyPress()
@@ -433,29 +413,20 @@ void progresser(int positionsX[TAILLE_MAX_SERPENT], int positionsY[TAILLE_MAX_SE
     // Vérifier si la nouvelle position est en collision avec une pomme
     if (tableau[nouveauY][nouveauX] == CHAR_POMME)
     {
-        // Si le serpent a mangé une pomme, on rajoute une pomme selon le tableau de pommes
-
-		// tailleSerpent++;
-		// vitesseJeu -= ACCEL_SERPENT;
-
 		nbPommesMangees++;
 		if (nbPommesMangees < NB_POMMES) {
 			ajouterPomme(nbPommesMangees);
 		}
-
-		// positionsX[tailleSerpent - 1] = positionsX[tailleSerpent - 2]; // Ajouter un segment au serpent
-		// positionsY[tailleSerpent - 1] = positionsY[tailleSerpent - 2];
-		// tableau[positionsY[tailleSerpent - 1]][positionsX[tailleSerpent - 1]] = CHAR_CORPS;
     }
 
     // Vérifier si la nouvelle position de la tête entre en collision avec le corps du serpent
-    // for (int i = 1; i < tailleSerpent; i++)
-	// {
-	// 	if (positionsX[i] == nouveauX && positionsY[i] == nouveauY)
-	// 	{
-    //         *detecCollision = true; // Collision avec le serpent
-    //     }
-    // }
+    for (int i = 1; i < tailleSerpent; i++)
+	{
+		if (positionsX[i] == nouveauX && positionsY[i] == nouveauY)
+		{
+            *detecCollision = true; // Collision avec le serpent
+        }
+    }
 
     // Déplacer le corps du serpent en décalant chaque segment vers la position du segment précédent
 
@@ -583,21 +554,18 @@ void detecterPomme(int* pommeX, int* pommeY)
 }
 
 
-// La fonction utilise le théorème de Pythagore pour trouver la distance entre la tête du serpent et la pomme,
-// Puis la compare avec la distance possible avec chacune des 4 directions en prochain mouvement possible
-// Et retourne, sous la forme d'un char, le déplacement optimal (cette fonction ne traîte pas le cas de deux distances égales)
-// Cette fonction n'anticipe pas les prochains mouvements
+// La fonction utilise le théorème de Pythagore pour trouver la distance entre la (x1, y1) et (x2, y2) et la retourne sous forme d'un int
 int distanceCarree(int x1, int y1, int x2, int y2) {
     return (int)pow(x1 - x2, 2) + (int)pow(y1 - y2, 2); // Théorème de Pythagore
 }
 
-char choisirDirection(int xTete, int yTete, char directionActuelle) {
-    int distanceActuelle = distanceCarree(xTete, yTete, pommeDetecX, pommeDetecY);
+char choisirDirection(int xTete, int yTete, char directionActuelle, int cibleX, int cibleY) {
+    int distanceActuelle = distanceCarree(xTete, yTete, cibleX, cibleY);
 
-    int distanceDroite = distanceCarree(xTete + 1, yTete, pommeDetecX, pommeDetecY);
-    int distanceGauche = distanceCarree(xTete - 1, yTete, pommeDetecX, pommeDetecY);
-    int distanceHaut = distanceCarree(xTete, yTete - 1, pommeDetecX, pommeDetecY);
-    int distanceBas = distanceCarree(xTete, yTete + 1, pommeDetecX, pommeDetecY);
+    int distanceDroite = distanceCarree(xTete + 1, yTete, cibleX, cibleY);
+    int distanceGauche = distanceCarree(xTete - 1, yTete, cibleX, cibleY);
+    int distanceHaut = distanceCarree(xTete, yTete - 1, cibleX, cibleY);
+    int distanceBas = distanceCarree(xTete, yTete + 1, cibleX, cibleY);
 
     if (distanceDroite < distanceActuelle)
         return TOUCHE_DROITE;
@@ -610,3 +578,74 @@ char choisirDirection(int xTete, int yTete, char directionActuelle) {
 
     return directionActuelle; // Si aucune direction n'est meilleure, continuer tout droit
 }
+
+void determinerCible(int cible[2], int positionsX[TAILLE_MAX_SERPENT], int positionsY[TAILLE_MAX_SERPENT])
+{
+	// Si le serpent est à plus de la moitié de la map dans une direction ou l'autre
+	// de la pomme, la cible est le trou opposé
+	int xTeteSerpent = positionsX[0];
+	int yTeteSerpent = positionsY[0];
+
+	// int xQueueSerpent = positionsX[tailleSerpent - 1];
+	// int yQueueSerpent = positionsY[tailleSerpent - 1];
+
+	int distanceAuTrouD = distanceCarree(xTeteSerpent, yTeteSerpent, TAILLE_TABLEAU_X - 1, MOITIE_HAUTEUR_TABLEAU);
+	int distanceAuTrouG = distanceCarree(xTeteSerpent, yTeteSerpent, 1, MOITIE_HAUTEUR_TABLEAU);
+	int distanceAuTrouH = distanceCarree(xTeteSerpent, yTeteSerpent, MOITIE_LARGEUR_TABLEAU, 1);
+	int distanceAuTrouB = distanceCarree(xTeteSerpent, yTeteSerpent, MOITIE_LARGEUR_TABLEAU, TAILLE_TABLEAU_Y - 1);
+
+	if( abs(xTeteSerpent - pommeDetecX) > MOITIE_LARGEUR_TABLEAU)
+	{
+		if (xTeteSerpent > pommeDetecX)
+		{
+			if(distanceAuTrouD < distanceAuTrouH) // Si c'est plus avantageux de passer par la droite que par le haut
+			{
+				cible[0] = TAILLE_TABLEAU_X - 1; // Aller vers le trou droit
+				cible[1] = MOITIE_HAUTEUR_TABLEAU;
+			}
+			else // Sinon
+			{
+				cible[0] = MOITIE_LARGEUR_TABLEAU; // Aller vers le trou haut
+				cible[1] = 1;
+			}
+		}
+		else
+		{
+			if(distanceAuTrouG < distanceAuTrouB) // Si c'est plus avantageux de passer par la gauche que par le bas
+			{
+				cible[0] = 1; // Aller vers le trou gauche
+				cible[1] = MOITIE_HAUTEUR_TABLEAU;
+			}
+			else // Sinon
+			{
+				cible[0] = MOITIE_LARGEUR_TABLEAU; // Aller vers le trou bas
+				cible[1] = TAILLE_TABLEAU_Y - 1;
+			}
+		}
+	}
+	else if( abs(yTeteSerpent - pommeDetecY) > MOITIE_HAUTEUR_TABLEAU)
+	{
+		if (yTeteSerpent > pommeDetecY)
+		{
+			cible[0] = MOITIE_LARGEUR_TABLEAU;
+			cible[1] = TAILLE_TABLEAU_Y - 1;
+		}
+		else
+		{
+			cible[0] = MOITIE_LARGEUR_TABLEAU;
+			cible[1] = 1;
+		}
+	}
+}
+
+/*
+TODO : Faire en sorte que l'implémentation marche : 
+si la pomme est à plus de la moitié de la map de la pomme dans une direction ou une autre (si abs(xSer - xPom) > tailleMapX/2) ou abs(ySer - ypom) > tailleMapY/2
+choisir la direction dans laquele il est le plus loin
+prendre le trou opposé (cibleActuelle = trou(Haut/Droit/Gauche/Bas)
+puis recalculer la distance manhattan (vol d'oiseau)
+si la tete du serpent est dans la sortie d'un trou et que le corps est de l'autre côté:
+recalculer la distance de la pomme
+
+Régler un bug qui fait crever sans raison
+*/
