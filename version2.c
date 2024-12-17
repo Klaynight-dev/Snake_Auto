@@ -559,9 +559,23 @@ int distanceCarree(int x1, int y1, int x2, int y2) {
     return (int)pow(x1 - x2, 2) + (int)pow(y1 - y2, 2); // Théorème de Pythagore
 }
 
+// Cette fonction gère la logique du changement de direction, avec la cible et les trous
+// c'EST INFERNAL C'EST SUPER LONG PTNFSDIUHGOUSDYGISUYRGISDURYGJYHG
 char choisirDirection(int xTete, int yTete, char directionActuelle, int cibleX, int cibleY) {
 	char prochaineDirection = directionActuelle;
-	int prochainX = xTete;
+	bool prochainSafe = false;
+
+	bool cibleADroite = cibleX > xTete; // Y a sans doute une meilleure manière de faire ça
+	bool cibleAGauche = cibleX < xTete;
+	bool cibleEnHaut = cibleY < yTete;
+	bool cibleEnBas = cibleY > yTete;
+
+	bool murADroite = false; // Initialisation de la détection des murs (meilleur moyen possible pareil)
+	bool murAGauche = false;
+	bool murEnHaut = false;
+	bool murEnBas = false;
+
+	int prochainX = xTete; // Initialisation
 	int prochainY = yTete;
 
     int distanceActuelle = distanceCarree(xTete, yTete, cibleX, cibleY);
@@ -570,14 +584,22 @@ char choisirDirection(int xTete, int yTete, char directionActuelle, int cibleX, 
     int distanceHaut = distanceCarree(xTete, yTete - 1, cibleX, cibleY);
     int distanceBas = distanceCarree(xTete, yTete + 1, cibleX, cibleY);
 
-    if (distanceDroite < distanceActuelle)
+    if (distanceDroite < distanceActuelle) // Déterminer la distance la plus courte (avant check)
+    {
         prochaineDirection = TOUCHE_DROITE;
+    }
     if (distanceGauche < distanceActuelle)
+    {
         prochaineDirection = TOUCHE_GAUCHE;
+    }
     if (distanceHaut < distanceActuelle)
+    {
         prochaineDirection = TOUCHE_HAUT;
+    }
     if (distanceBas < distanceActuelle)
+    {
         prochaineDirection = TOUCHE_BAS;
+    }
 
 	switch(prochaineDirection) { // Déterminer la prochaine coordonnée du serpent pour pouvoir anticiper
 		case TOUCHE_DROITE:
@@ -594,13 +616,51 @@ char choisirDirection(int xTete, int yTete, char directionActuelle, int cibleX, 
 			break;
 	}
 
-	if(tableau[prochainY][prochainX] != CHAR_VIDE) {
-		prochaineDirection = directionActuelle;
+	if(tableau[prochainY][prochainX] == CHAR_VIDE || tableau[prochainY][prochainX] == CHAR_POMME) {
+		prochainSafe = true;
+	}
+	else
+	{
+		switch(prochaineDirection) { // Voir ou est la prochaine direction pour savoir ou est-ce qu'on a rencontré un mur (je pense qu'on peut faire ça mieux en
+			case TOUCHE_DROITE: // déduisant l'emplacement du mur de la direction actuelle mais pas le temps)
+				murADroite = true;
+				break;
+			case TOUCHE_GAUCHE:
+				murAGauche = true;
+				break;
+			case TOUCHE_HAUT:
+				murEnHaut = true;
+				break;
+			case TOUCHE_BAS:
+				murEnBas = true;
+				break;
+		}
+	}
+
+	if(!prochainSafe) // Si le serpent rencontre un obstacle (lui-même ou un mur)
+	{
+		if(cibleADroite && +!murADroite) // Si la cible est vers la droite et qu'il y a un mur en bas
+		{
+			prochaineDirection = TOUCHE_DROITE;
+		}
+		if(cibleAGauche && !murAGauche)
+		{
+			prochaineDirection = TOUCHE_GAUCHE;
+		}
+		if(cibleEnHaut && !murEnHaut)
+		{
+			prochaineDirection = TOUCHE_HAUT;
+		}
+		if(cibleEnBas && !murEnBas)
+		{
+			prochaineDirection = TOUCHE_BAS;
+		}
 	}
 
     return prochaineDirection; // Si aucune direction n'est meilleure, continuer tout droit
 }
 
+// Cette fonction détermine la cible vers laquelle le serpent doit se diriger, en tenant compte des trous
 void determinerCible(int cible[2], int positionsX[TAILLE_MAX_SERPENT], int positionsY[TAILLE_MAX_SERPENT])
 {
 	// Si le serpent est à plus de la moitié de la map dans une direction ou l'autre
@@ -616,9 +676,9 @@ void determinerCible(int cible[2], int positionsX[TAILLE_MAX_SERPENT], int posit
 	int distanceAuTrouH = distanceCarree(xTeteSerpent, yTeteSerpent, MOITIE_LARGEUR_TABLEAU, 1);
 	int distanceAuTrouB = distanceCarree(xTeteSerpent, yTeteSerpent, MOITIE_LARGEUR_TABLEAU, TAILLE_TABLEAU_Y - 1);
 
-	if( abs(xTeteSerpent - pommeDetecX) > MOITIE_LARGEUR_TABLEAU)
+	if( abs(xTeteSerpent - pommeDetecX) > MOITIE_LARGEUR_TABLEAU) // Si le serpent est à plus de la moitié de la map de la pomme dans la largeur
 	{
-		if (xTeteSerpent > pommeDetecX)
+		if (xTeteSerpent > pommeDetecX) // Si le serpent est à droite de la pomme
 		{
 			if(distanceAuTrouD < distanceAuTrouH) // Si c'est plus avantageux de passer par la droite que par le haut
 			{
@@ -631,7 +691,7 @@ void determinerCible(int cible[2], int positionsX[TAILLE_MAX_SERPENT], int posit
 				cible[1] = 1;
 			}
 		}
-		else
+		else // Si le serpent est à gauche de la pomme
 		{
 			if(distanceAuTrouG < distanceAuTrouB) // Si c'est plus avantageux de passer par la gauche que par le bas
 			{
@@ -645,29 +705,26 @@ void determinerCible(int cible[2], int positionsX[TAILLE_MAX_SERPENT], int posit
 			}
 		}
 	}
-	else if( abs(yTeteSerpent - pommeDetecY) > MOITIE_HAUTEUR_TABLEAU)
+	else if( abs(yTeteSerpent - pommeDetecY) > MOITIE_HAUTEUR_TABLEAU) // Si le serpent est à plus de la moitié de la map de la pomme dans la hauteur
 	{
-		if (yTeteSerpent > pommeDetecY)
+		if (yTeteSerpent > pommeDetecY) // Si le serpent est au dessus de la pomme
 		{
 			cible[0] = MOITIE_LARGEUR_TABLEAU;
-			cible[1] = TAILLE_TABLEAU_Y - 1;
+			cible[1] = TAILLE_TABLEAU_Y - 1; // Trou bas
 		}
 		else
 		{
 			cible[0] = MOITIE_LARGEUR_TABLEAU;
-			cible[1] = 1;
+			cible[1] = 1; // Trou haut
 		}
+	}
+	else
+	{
+		cible[0] = pommeDetecX;
+		cible[1] = pommeDetecY;
 	}
 }
 
 /*
-TODO : Faire en sorte que l'implémentation marche : 
-si la pomme est à plus de la moitié de la map de la pomme dans une direction ou une autre (si abs(xSer - xPom) > tailleMapX/2) ou abs(ySer - ypom) > tailleMapY/2
-choisir la direction dans laquele il est le plus loin
-prendre le trou opposé (cibleActuelle = trou(Haut/Droit/Gauche/Bas)
-puis recalculer la distance manhattan (vol d'oiseau)
-si la tete du serpent est dans la sortie d'un trou et que le corps est de l'autre côté:
-recalculer la distance de la pomme
-
-Régler un bug qui fait crever le snake après avoir pris un trou : la direction se retrouve à gauche ??
+TODO : Régler le bug qui fait que le serpent se prend le mur en essayant de retourner dans le trou après avoir pris la première pomme
 */
