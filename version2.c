@@ -560,23 +560,45 @@ int distanceCarree(int x1, int y1, int x2, int y2) {
 }
 
 char choisirDirection(int xTete, int yTete, char directionActuelle, int cibleX, int cibleY) {
-    int distanceActuelle = distanceCarree(xTete, yTete, cibleX, cibleY);
+	char prochaineDirection = directionActuelle;
+	int prochainX = xTete;
+	int prochainY = yTete;
 
+    int distanceActuelle = distanceCarree(xTete, yTete, cibleX, cibleY);
     int distanceDroite = distanceCarree(xTete + 1, yTete, cibleX, cibleY);
     int distanceGauche = distanceCarree(xTete - 1, yTete, cibleX, cibleY);
     int distanceHaut = distanceCarree(xTete, yTete - 1, cibleX, cibleY);
     int distanceBas = distanceCarree(xTete, yTete + 1, cibleX, cibleY);
 
     if (distanceDroite < distanceActuelle)
-        return TOUCHE_DROITE;
+        prochaineDirection = TOUCHE_DROITE;
     if (distanceGauche < distanceActuelle)
-        return TOUCHE_GAUCHE;
+        prochaineDirection = TOUCHE_GAUCHE;
     if (distanceHaut < distanceActuelle)
-        return TOUCHE_HAUT;
+        prochaineDirection = TOUCHE_HAUT;
     if (distanceBas < distanceActuelle)
-        return TOUCHE_BAS;
+        prochaineDirection = TOUCHE_BAS;
 
-    return directionActuelle; // Si aucune direction n'est meilleure, continuer tout droit
+	switch(prochaineDirection) { // Déterminer la prochaine coordonnée du serpent pour pouvoir anticiper
+		case TOUCHE_DROITE:
+			prochainX = xTete + 1;
+			break;
+		case TOUCHE_GAUCHE:
+			prochainX = xTete - 1;
+			break;
+		case TOUCHE_HAUT:
+			prochainY = yTete - 1;
+			break;	
+		case TOUCHE_BAS:
+			prochainY = yTete + 1;
+			break;
+	}
+
+	if(tableau[prochainY][prochainX] != CHAR_VIDE) {
+		prochaineDirection = directionActuelle;
+	}
+
+    return prochaineDirection; // Si aucune direction n'est meilleure, continuer tout droit
 }
 
 void determinerCible(int cible[2], int positionsX[TAILLE_MAX_SERPENT], int positionsY[TAILLE_MAX_SERPENT])
@@ -647,5 +669,5 @@ puis recalculer la distance manhattan (vol d'oiseau)
 si la tete du serpent est dans la sortie d'un trou et que le corps est de l'autre côté:
 recalculer la distance de la pomme
 
-Régler un bug qui fait crever sans raison
+Régler un bug qui fait crever le snake après avoir pris un trou : la direction se retrouve à gauche ??
 */
