@@ -32,8 +32,8 @@ int pommeDetecY = 0;
 int nbPommesMangees = 0; // On traque combien de pommes on mange pour pouvoir faire apparaitre la bonne une fois mangée
 
 int nbrMouvements = 0;
-int tempsCPUDepart = 0;
-int tempsCPUFin = 0;
+clock_t tempsCPUDepart = 0;
+clock_t tempsCPUFin = 0;
 
 
 /**
@@ -64,7 +64,7 @@ int main()
     initPlateau();
 
 	serpentDansTab(positionsX, positionsY);
-    srand(time(NULL)); // Initialiser l'aléatoire
+	srand((unsigned int)time(NULL)); // Initialiser l'aléatoire
 
     dessinerPlateau(); // Afficher le tableau de jeu initial
 	ajouterPomme(nbPommesMangees);
@@ -73,7 +73,7 @@ int main()
 
     while (!devraitQuitter) // Boucle du jeu
     {
-        usleep(vitesseJeu);
+		usleep((__useconds_t)vitesseJeu);
 
 		aQuitte = checkAKeyPress(); // Si l'utilisateur veut quitter, mettre aQuitte = true
 		
@@ -196,7 +196,7 @@ void changerDirection(char* direction, int positionsX[TAILLE_MAX_SERPENT], int p
 */
 int checkAKeyPress()
 {
-	char ch;
+	int ch;
 	if(kbhit())
 	{
 		ch = getchar();
@@ -232,7 +232,7 @@ void disableEcho()
 	}
 
 	// Desactiver le flag ECHO
-	tty.c_lflag &= ~ECHO;
+	tty.c_lflag &= (tcflag_t)~ECHO;
 
 	// Appliquer les nouvelles configurations
 	if (tcsetattr(STDIN_FILENO, TCSANOW, &tty) == -1) {
@@ -391,9 +391,6 @@ void progresser(int positionsX[TAILLE_MAX_SERPENT], int positionsY[TAILLE_MAX_SE
 			break;
 	}
 
-	nouveauX %= TAILLE_TABLEAU_X; // Wrap les positions
-	nouveauY %= TAILLE_TABLEAU_Y;
-
     // Vérifier si la nouvelle position est en collision avec un '#'
     if (tableau[nouveauY][nouveauX] == CHAR_OBSTACLE)
 	{
@@ -456,7 +453,7 @@ int kbhit()
 	// mettre le terminal en mode non bloquant
 	tcgetattr(STDIN_FILENO, &oldt);
 	newt = oldt;
-	newt.c_lflag &= ~(ICANON | ECHO);
+	newt.c_lflag &= (tcflag_t)~(ICANON | ECHO);
 	tcsetattr(STDIN_FILENO, TCSANOW, &newt);
 	oldf = fcntl(STDIN_FILENO, F_GETFL, 0);
 	fcntl(STDIN_FILENO, F_SETFL, oldf | O_NONBLOCK);
@@ -565,43 +562,29 @@ char choisirDirection(int xTete, int yTete, char directionActuelle, int cibleX, 
 	char prochaineDirection = directionActuelle;
 	bool prochainSafe = false;
 
-	bool cibleADroite = cibleX > xTete; // Y a sans doute une meilleure manière de faire ça
-	bool cibleAGauche = cibleX < xTete;
-	bool cibleEnHaut = cibleY < yTete;
-	bool cibleEnBas = cibleY > yTete;
-
-	bool murADroite = false; // Initialisation de la détection des murs (meilleur moyen possible pareil)
-	bool murAGauche = false;
-	bool murEnHaut = false;
-	bool murEnBas = false;
-
-	int prochainX = xTete; // Initialisation
+	int prochainX = xTete;
 	int prochainY = yTete;
 
-    int distanceActuelle = distanceCarree(xTete, yTete, cibleX, cibleY);
-    int distanceDroite = distanceCarree(xTete + 1, yTete, cibleX, cibleY);
-    int distanceGauche = distanceCarree(xTete - 1, yTete, cibleX, cibleY);
-    int distanceHaut = distanceCarree(xTete, yTete - 1, cibleX, cibleY);
-    int distanceBas = distanceCarree(xTete, yTete + 1, cibleX, cibleY);
+	int distanceActuelle = distanceCarree(xTete, yTete, cibleX, cibleY);
+	int distanceDroite = distanceCarree(xTete + 1, yTete, cibleX, cibleY);
+	int distanceGauche = distanceCarree(xTete - 1, yTete, cibleX, cibleY);
+	int distanceHaut = distanceCarree(xTete, yTete - 1, cibleX, cibleY);
+	int distanceBas = distanceCarree(xTete, yTete + 1, cibleX, cibleY);
 
-    if (distanceDroite < distanceActuelle) // Déterminer la distance la plus courte (avant check)
-    {
-        prochaineDirection = TOUCHE_DROITE;
-    }
-    if (distanceGauche < distanceActuelle)
-    {
-        prochaineDirection = TOUCHE_GAUCHE;
-    }
-    if (distanceHaut < distanceActuelle)
-    {
-        prochaineDirection = TOUCHE_HAUT;
-    }
-    if (distanceBas < distanceActuelle)
-    {
-        prochaineDirection = TOUCHE_BAS;
-    }
+	if (distanceDroite < distanceActuelle) {
+		prochaineDirection = TOUCHE_DROITE;
+	}
+	if (distanceGauche < distanceActuelle) {
+		prochaineDirection = TOUCHE_GAUCHE;
+	}
+	if (distanceHaut < distanceActuelle) {
+		prochaineDirection = TOUCHE_HAUT;
+	}
+	if (distanceBas < distanceActuelle) {
+		prochaineDirection = TOUCHE_BAS;
+	}
 
-	switch(prochaineDirection) { // Déterminer la prochaine coordonnée du serpent pour pouvoir anticiper
+	switch (prochaineDirection) {
 		case TOUCHE_DROITE:
 			prochainX = xTete + 1;
 			break;
@@ -610,54 +593,40 @@ char choisirDirection(int xTete, int yTete, char directionActuelle, int cibleX, 
 			break;
 		case TOUCHE_HAUT:
 			prochainY = yTete - 1;
-			break;	
+			break;
 		case TOUCHE_BAS:
 			prochainY = yTete + 1;
 			break;
 	}
 
-	if(tableau[prochainY][prochainX] == CHAR_VIDE || tableau[prochainY][prochainX] == CHAR_POMME) {
+	if (tableau[prochainY][prochainX] == CHAR_VIDE || tableau[prochainY][prochainX] == CHAR_POMME) {
 		prochainSafe = true;
 	}
-	else
-	{
-		switch(prochaineDirection) { // Voir ou est la prochaine direction pour savoir ou est-ce qu'on a rencontré un mur (je pense qu'on peut faire ça mieux en
-			case TOUCHE_DROITE: // déduisant l'emplacement du mur de la direction actuelle mais pas le temps)
-				murADroite = true;
-				break;
-			case TOUCHE_GAUCHE:
-				murAGauche = true;
-				break;
-			case TOUCHE_HAUT:
-				murEnHaut = true;
-				break;
-			case TOUCHE_BAS:
-				murEnBas = true;
-				break;
-		}
-	}
 
-	if(!prochainSafe) // Si le serpent rencontre un obstacle (lui-même ou un mur)
-	{
-		if(cibleADroite && +!murADroite) // Si la cible est vers la droite et qu'il y a un mur en bas
-		{
+	if (!prochainSafe) {
+		if (cibleX > xTete && tableau[yTete][xTete + 1] == CHAR_VIDE) {
 			prochaineDirection = TOUCHE_DROITE;
-		}
-		if(cibleAGauche && !murAGauche)
-		{
+		} else if (cibleX < xTete && tableau[yTete][xTete - 1] == CHAR_VIDE) {
 			prochaineDirection = TOUCHE_GAUCHE;
-		}
-		if(cibleEnHaut && !murEnHaut)
-		{
+		} else if (cibleY < yTete && tableau[yTete - 1][xTete] == CHAR_VIDE) {
 			prochaineDirection = TOUCHE_HAUT;
-		}
-		if(cibleEnBas && !murEnBas)
-		{
+		} else if (cibleY > yTete && tableau[yTete + 1][xTete] == CHAR_VIDE) {
 			prochaineDirection = TOUCHE_BAS;
 		}
 	}
 
-    return prochaineDirection; // Si aucune direction n'est meilleure, continuer tout droit
+	// Vérifier si la prochaine direction est sûre
+	if (prochaineDirection == TOUCHE_DROITE && (tableau[yTete][xTete + 1] == CHAR_OBSTACLE || tableau[yTete][xTete + 1] == CHAR_CORPS)) {
+		prochaineDirection = TOUCHE_GAUCHE;
+	} else if (prochaineDirection == TOUCHE_GAUCHE && (tableau[yTete][xTete - 1] == CHAR_OBSTACLE || tableau[yTete][xTete - 1] == CHAR_CORPS)) {
+		prochaineDirection = TOUCHE_DROITE;
+	} else if (prochaineDirection == TOUCHE_HAUT && (tableau[yTete - 1][xTete] == CHAR_OBSTACLE || tableau[yTete - 1][xTete] == CHAR_CORPS)) {
+		prochaineDirection = TOUCHE_BAS;
+	} else if (prochaineDirection == TOUCHE_BAS && (tableau[yTete + 1][xTete] == CHAR_OBSTACLE || tableau[yTete + 1][xTete] == CHAR_CORPS)) {
+		prochaineDirection = TOUCHE_HAUT;
+	}
+
+	return prochaineDirection;
 }
 
 // Cette fonction détermine la cible vers laquelle le serpent doit se diriger, en tenant compte des trous
