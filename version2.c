@@ -79,7 +79,7 @@ int main()
 		
 		// if(tailleSerpent >= TAILLE_MAX_SERPENT)
 		// {aGagne = true;} // Si la taille de l'utilisateur dépasse la taille maximale autorisée, il a gagné
-
+		
 		if (nbPommesMangees == NB_POMMES) { // Si l'utilisateur a mangé toutes les pommes, il a gagné 
 			aGagne = true;
 		}
@@ -99,7 +99,14 @@ int main()
 		serpentDansTab(positionsX, positionsY); 
 
         dessinerPlateau(); // Redessiner le tableau de jeu avec le serpent mis à jour
-		detecterPomme(&pommeDetecX, &pommeDetecY); // TODO : Optimiser pour que ça détecte pas chaque frame
+		detecterPomme(&pommeDetecX, &pommeDetecY);
+
+		// Afficher les informations du jeu
+		//printf("\nScore :%d/%d\n", nbPommesMangees, NB_POMMES);
+		//printf("Mouvements : %d\n", nbrMouvements);
+		//printf("Temps : %f\n", (double)(clock() - tempsCPUDepart) / CLOCKS_PER_SEC);
+		//printf("Vitesse : %d\n", vitesseJeu);
+		//printf("Position : %d, %d\n", positionsX[0], positionsY[0]);
     }
 
     enableEcho(); // Réactiver l'écho
@@ -364,80 +371,59 @@ void genererTrous()
 
  La fonction qui fait avancer le corps du serpent, puis bouge la tête dans la direction dans laquelle elle est sensée avancer
 */
-void progresser(int positionsX[TAILLE_MAX_SERPENT], int positionsY[TAILLE_MAX_SERPENT], char direction, bool* detecCollision)
-{
+void progresser(int positionsX[TAILLE_MAX_SERPENT], int positionsY[TAILLE_MAX_SERPENT], char direction, bool* detecCollision) {
     int nouveauX = positionsX[0];
     int nouveauY = positionsY[0];
 
-    // Calculer la nouvelle position de la tête en fonction de la direction
+    // Calcul de la nouvelle position
     switch (direction) {
-		case TOUCHE_DROITE:
-			nouveauX++;
-			nbrMouvements++;
-			break;
-		case TOUCHE_HAUT:
-			nouveauY--;
-			nbrMouvements++;
-			break;
-		case TOUCHE_GAUCHE:
-			nouveauX--;
-			nbrMouvements++;
-			break;
-		case TOUCHE_BAS:
-			nouveauY++;
-			nbrMouvements++;
-			break;
-		default:
-			break;
-	}
-
-    // Vérifier si la nouvelle position est en collision avec un '#'
-    if (tableau[nouveauY][nouveauX] == CHAR_OBSTACLE)
-	{
-        *detecCollision = true; // Collision avec le bord
+        case TOUCHE_DROITE: nouveauX++; break;
+        case TOUCHE_HAUT: nouveauY--; break;
+        case TOUCHE_GAUCHE: nouveauX--; break;
+        case TOUCHE_BAS: nouveauY++; break;
+        default: break;
     }
 
-	if(nouveauX < 1 && direction == TOUCHE_GAUCHE && (nouveauY == TAILLE_TABLEAU_Y / 2)) // Détection des trous
-	{
-		nouveauX = TAILLE_TABLEAU_X - 1;
-	}
-
-	if(nouveauY < 1 && direction == TOUCHE_HAUT && (nouveauX == TAILLE_TABLEAU_X / 2))
-	{
-		nouveauY = TAILLE_TABLEAU_Y - 1;
-	}
-
-    // Vérifier si la nouvelle position est en collision avec une pomme
-    if (tableau[nouveauY][nouveauX] == CHAR_POMME)
-    {
-		nbPommesMangees++;
-		if (nbPommesMangees < NB_POMMES) {
-			ajouterPomme(nbPommesMangees);
-		}
+    // Gestion des portes (trous)
+    if (nouveauX < 1 && direction == TOUCHE_GAUCHE && (nouveauY == TAILLE_TABLEAU_Y / 2)) {
+        nouveauX = TAILLE_TABLEAU_X - 2;
+    }
+    if (nouveauX > TAILLE_TABLEAU_X - 2 && direction == TOUCHE_DROITE && (nouveauY == TAILLE_TABLEAU_Y / 2)) {
+        nouveauX = 1;
+    }
+    if (nouveauY < 1 && direction == TOUCHE_HAUT && (nouveauX == TAILLE_TABLEAU_X / 2)) {
+        nouveauY = TAILLE_TABLEAU_Y - 2;
+    }
+    if (nouveauY > TAILLE_TABLEAU_Y - 2 && direction == TOUCHE_BAS && (nouveauX == TAILLE_TABLEAU_X / 2)) {
+        nouveauY = 1;
     }
 
-    // Vérifier si la nouvelle position de la tête entre en collision avec le corps du serpent
-    for (int i = 1; i < tailleSerpent; i++)
-	{
-		if (positionsX[i] == nouveauX && positionsY[i] == nouveauY)
-		{
-            *detecCollision = true; // Collision avec le serpent
+    // Vérification des collisions
+    if (tableau[nouveauY][nouveauX] == CHAR_OBSTACLE || tableau[nouveauY][nouveauX] == CHAR_CORPS) {
+        *detecCollision = true;
+        return;
+    }
+
+    // Vérification des pommes
+    if (tableau[nouveauY][nouveauX] == CHAR_POMME) {
+        nbPommesMangees++;
+        if (nbPommesMangees < NB_POMMES) {
+            ajouterPomme(nbPommesMangees);
         }
     }
 
-    // Déplacer le corps du serpent en décalant chaque segment vers la position du segment précédent
-
-
-    for (int i = tailleSerpent - 1; i > 0; i--)
-	{
+    // Déplacement du serpent
+    for (int i = tailleSerpent - 1; i > 0; i--) {
         positionsX[i] = positionsX[i - 1];
         positionsY[i] = positionsY[i - 1];
     }
-	
-    // Mettre à jour la position de la tête
     positionsX[0] = nouveauX;
     positionsY[0] = nouveauY;
+	nbrMouvements++;
 }
+
+
+
 
 int kbhit()
 {
@@ -536,15 +522,17 @@ int genererEntierDansBornes(int min, int max)
 
 void detecterPomme(int* pommeX, int* pommeY)
 {
-	for (int i = 0; i < TAILLE_TABLEAU_Y; i++)
-	{
-		for (int j = 0; j < TAILLE_TABLEAU_X; j++)
+	if (tableau[*pommeY][*pommeX] != CHAR_POMME) {// La pomme est toujours à la même position
+		for (int i = 0; i < TAILLE_TABLEAU_Y; i++)
 		{
-			if (tableau[i][j] == CHAR_POMME)
+			for (int j = 0; j < TAILLE_TABLEAU_X; j++)
 			{
-				*pommeX = j;
-				*pommeY = i;
-				return;
+				if (tableau[i][j] == CHAR_POMME)
+				{
+					*pommeX = j;
+					*pommeY = i;
+					return;
+				}
 			}
 		}
 	}
