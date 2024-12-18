@@ -101,12 +101,7 @@ int main()
         dessinerPlateau(); // Redessiner le tableau de jeu avec le serpent mis à jour
 		detecterPomme(&pommeDetecX, &pommeDetecY);
 
-		// Afficher les informations du jeu
-		//printf("\nScore :%d/%d\n", nbPommesMangees, NB_POMMES);
-		//printf("Mouvements : %d\n", nbrMouvements);
-		//printf("Temps : %f\n", (double)(clock() - tempsCPUDepart) / CLOCKS_PER_SEC);
-		//printf("Vitesse : %d\n", vitesseJeu);
-		//printf("Position : %d, %d\n", positionsX[0], positionsY[0]);
+        devInfo(positionsX, positionsY, direction); // Afficher les informations du jeu à l'écran
     }
 
     enableEcho(); // Réactiver l'écho
@@ -125,6 +120,20 @@ int main()
 	}
 
     return EXIT_SUCCESS;
+}
+
+void devInfo(int positionsX[20], int positionsY[20], char direction)
+{
+    // Afficher les informations du jeu
+    printf("\nScore :%d/%d\t", nbPommesMangees, NB_POMMES);
+    printf("Mouvements : %d\t\t", nbrMouvements);
+    printf("Temps : %f\t\t", (double)(clock() - tempsCPUDepart) / CLOCKS_PER_SEC);
+    printf("Position : %d, %d\t\t", positionsX[0], positionsY[0]);
+    printf("Direction : %s\t\t", direction == TOUCHE_DROITE ? "Droite" : direction == TOUCHE_GAUCHE ? "Gauche"
+                                                                   : direction == TOUCHE_HAUT     ? "Haut"
+                                                                                                  : "Bas");
+	printf("Pomme : %d, %d\n", pommeDetecX, pommeDetecY);
+	printf("\033[A\033[2K"); // Efface la ligne précédente
 }
 
 /**
@@ -605,13 +614,37 @@ char choisirDirection(int xTete, int yTete, char directionActuelle, int cibleX, 
 
 	// Vérifier si la prochaine direction est sûre
 	if (prochaineDirection == TOUCHE_DROITE && (tableau[yTete][xTete + 1] == CHAR_OBSTACLE || tableau[yTete][xTete + 1] == CHAR_CORPS)) {
-		prochaineDirection = TOUCHE_GAUCHE;
+		if (directionActuelle != TOUCHE_GAUCHE) {
+			prochaineDirection = TOUCHE_GAUCHE;
+		} else if (tableau[yTete - 1][xTete] == CHAR_VIDE) {
+			prochaineDirection = TOUCHE_HAUT;
+		} else {
+			prochaineDirection = TOUCHE_BAS;
+		}
 	} else if (prochaineDirection == TOUCHE_GAUCHE && (tableau[yTete][xTete - 1] == CHAR_OBSTACLE || tableau[yTete][xTete - 1] == CHAR_CORPS)) {
-		prochaineDirection = TOUCHE_DROITE;
+		if (directionActuelle != TOUCHE_DROITE) {
+			prochaineDirection = TOUCHE_DROITE;
+		} else if (tableau[yTete - 1][xTete] == CHAR_VIDE) {
+			prochaineDirection = TOUCHE_HAUT;
+		} else {
+			prochaineDirection = TOUCHE_BAS;
+		}
 	} else if (prochaineDirection == TOUCHE_HAUT && (tableau[yTete - 1][xTete] == CHAR_OBSTACLE || tableau[yTete - 1][xTete] == CHAR_CORPS)) {
-		prochaineDirection = TOUCHE_BAS;
+		if (directionActuelle != TOUCHE_BAS) {
+			prochaineDirection = TOUCHE_BAS;
+		} else if (tableau[yTete][xTete + 1] == CHAR_VIDE) {
+			prochaineDirection = TOUCHE_DROITE;
+		} else {
+			prochaineDirection = TOUCHE_GAUCHE;
+		}
 	} else if (prochaineDirection == TOUCHE_BAS && (tableau[yTete + 1][xTete] == CHAR_OBSTACLE || tableau[yTete + 1][xTete] == CHAR_CORPS)) {
-		prochaineDirection = TOUCHE_HAUT;
+		if (directionActuelle != TOUCHE_HAUT) {
+			prochaineDirection = TOUCHE_HAUT;
+		} else if (tableau[yTete][xTete + 1] == CHAR_VIDE) {
+			prochaineDirection = TOUCHE_DROITE;
+		} else {
+			prochaineDirection = TOUCHE_GAUCHE;
+		}
 	}
 
 	return prochaineDirection;

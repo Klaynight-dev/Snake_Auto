@@ -18,7 +18,7 @@
  * \def VITESSE_JEU
  * \brief La vitesse à laquelle le jeu va avancer (en nanosecondes)
  */
-#define VITESSE_JEU_INITIALE 200000
+#define VITESSE_JEU_INITIALE 50000
 
 /**
  * \def TOUCHE_ARRET
@@ -156,7 +156,9 @@ void effacerEcran();
 
 int checkAKeyPress();
 void genererSerpent(int positionsX[TAILLE_MAX_SERPENT], int positionsY[TAILLE_MAX_SERPENT], int x, int y);
-void initPlateau();	
+void initPlateau();
+void devInfo(int positionsX[20], int positionsY[20], char direction);
+
 void dessinerPlateau();
 void afficherSerpent(int positionsX[TAILLE_MAX_SERPENT], int positionsY[TAILLE_MAX_SERPENT]);
 void effacerSerpent(int positionsX[TAILLE_MAX_SERPENT], int positionsY[TAILLE_MAX_SERPENT]);
@@ -181,5 +183,3 @@ void determinerCible(int cible[2], int positionsX[TAILLE_MAX_SERPENT], int posit
 
 
 typedef char t_plateau[TAILLE_TABLEAU_Y][TAILLE_TABLEAU_X];
-
-
