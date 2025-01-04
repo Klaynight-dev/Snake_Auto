@@ -133,6 +133,8 @@
 #define MOITIE_HAUTEUR_TABLEAU (TAILLE_TABLEAU_Y / 2)
 #define MOITIE_LARGEUR_TABLEAU (TAILLE_TABLEAU_X / 2)
 
+#define NB_PAVES 6
+
 /************************************************
  *                                              *
  *          Définition des fonctions            *
@@ -167,8 +169,7 @@ void serpentDansTab(int positionsX[TAILLE_MAX_SERPENT], int positionsY[TAILLE_MA
 
 void changerDirection(char* direction, int positionsX[TAILLE_MAX_SERPENT], int positionsY[TAILLE_MAX_SERPENT]);	
 int genererEntierDansBornes(int min, int max);
-void genererPaves(int positionsX[TAILLE_MAX_SERPENT], int positionsY[TAILLE_MAX_SERPENT]);
-void genererUnPave(int positionsX[TAILLE_MAX_SERPENT], int positionsY[TAILLE_MAX_SERPENT]);
+void genererPaves();
 void genererTrous();
 void ajouterPomme(int indice);
 void succesJeu();

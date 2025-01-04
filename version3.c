@@ -25,7 +25,7 @@
 t_plateau tableau;
 int tailleSerpent = TAILLE_SERPENT;
 int vitesseJeu = VITESSE_JEU_INITIALE;
-int lesPommesX[NB_POMMES] = {50, 75, 78, 2, 8, 78, 74, 2, 72, 5};
+int lesPommesX[NB_POMMES] = {75, 75, 78, 2, 8, 78, 74, 2, 72, 5};
 int lesPommesY[NB_POMMES] = {8, 39, 2, 2, 5, 39, 33, 38, 35, 2};
 int lesPavesX[NB_PAVES] = { 3, 74, 3, 74, 38, 38};
 int lesPavesY[NB_PAVES] = { 3, 3, 34, 34, 21, 15};
@@ -66,6 +66,7 @@ int main()
     initPlateau();
 
 	serpentDansTab(positionsX, positionsY);
+	genererPaves(positionsX, positionsY);
 	srand((unsigned int)time(NULL)); // Initialiser l'aléatoire
 
     dessinerPlateau(); // Afficher le tableau de jeu initial
@@ -171,20 +172,11 @@ void initPlateau()
  */
 void dessinerPlateau()
 {
-	for (int i = 0; i < NB_PAVES; i++)
+	for (int i = 0; i < TAILLE_TABLEAU_Y; i++)
 	{
-		int x = lesPavesX[i];
-		int y = lesPavesY[i];
-
-		for (int j = 0; j < TAILLE_PAVE_Y; j++)
+		for (int j = 0; j < TAILLE_TABLEAU_X; j++)
 		{
-			for (int k = 0; k < TAILLE_PAVE_X; k++)
-			{
-				if (x + k < TAILLE_TABLEAU_X && y + j < TAILLE_TABLEAU_Y)
-				{
-					tableau[y + j][x + k] = CHAR_OBSTACLE;
-				}
-			}
+			afficher(j, i, tableau[i][j]);
 		}
 	}
 }
@@ -568,6 +560,7 @@ int distanceCarree(int x1, int y1, int x2, int y2) {
 // Cette fonction gère la logique du changement de direction, avec la cible et les trous
 // c'EST INFERNAL C'EST SUPER LONG PTNFSDIUHGOUSDYGISUYRGISDURYGJYHG
 char choisirDirection(int xTete, int yTete, char directionActuelle, int cibleX, int cibleY) {
+	
 	char prochaineDirection = directionActuelle;
 	bool prochainSafe = false;
 
@@ -724,5 +717,25 @@ void determinerCible(int cible[2], int positionsX[TAILLE_MAX_SERPENT], int posit
 	{
 		cible[0] = pommeDetecX;
 		cible[1] = pommeDetecY;
+	}
+}
+
+void genererPaves()
+{
+	for (int i = 0; i < NB_PAVES; i++)
+	{
+		int x = lesPavesX[i];
+		int y = lesPavesY[i];
+
+		for (int j = 0; j < TAILLE_PAVE_Y; j++)
+		{
+			for (int k = 0; k < TAILLE_PAVE_X; k++)
+			{
+				if (x + k < TAILLE_TABLEAU_X && y + j < TAILLE_TABLEAU_Y)
+				{
+					tableau[y + j][x + k] = CHAR_OBSTACLE;
+				}
+			}
+		}
 	}
 }
