@@ -559,8 +559,8 @@ int distanceCarree(int x1, int y1, int x2, int y2) {
 
 // Cette fonction gère la logique du changement de direction, avec la cible et les trous
 // c'EST INFERNAL C'EST SUPER LONG PTNFSDIUHGOUSDYGISUYRGISDURYGJYHG
-char choisirDirection(int xTete, int yTete, char directionActuelle, int cibleX, int cibleY) {
-	
+char choisirDirection(int xTete, int yTete, char directionActuelle, int cibleX, int cibleY)
+{
 	char prochaineDirection = directionActuelle;
 	bool prochainSafe = false;
 
@@ -572,6 +572,16 @@ char choisirDirection(int xTete, int yTete, char directionActuelle, int cibleX, 
 	int distanceGauche = distanceCarree(xTete - 1, yTete, cibleX, cibleY);
 	int distanceHaut = distanceCarree(xTete, yTete - 1, cibleX, cibleY);
 	int distanceBas = distanceCarree(xTete, yTete + 1, cibleX, cibleY);
+
+	bool hautOccupeMur = tableau[yTete - 1][xTete] == CHAR_OBSTACLE ;
+	bool basOccupeMur = tableau[yTete + 1][xTete] == CHAR_OBSTACLE;
+	bool gaucheOccupeMur = tableau[yTete][xTete - 1] == CHAR_OBSTACLE ;
+	bool droiteOccupeMur = tableau[yTete][xTete + 1] == CHAR_OBSTACLE;
+
+	bool hautOccupeCorps = tableau[yTete - 1][xTete] == CHAR_CORPS;
+	bool basOccupeCorps = tableau[yTete + 1][xTete] == CHAR_CORPS;
+	bool gaucheOccupeCorps = tableau[yTete][xTete - 1] == CHAR_CORPS;
+	bool droiteOccupeCorps = tableau[yTete][xTete + 1] == CHAR_CORPS;
 
 	if (distanceDroite < distanceActuelle) {
 		prochaineDirection = TOUCHE_DROITE;
@@ -601,57 +611,89 @@ char choisirDirection(int xTete, int yTete, char directionActuelle, int cibleX, 
 			break;
 	}
 
+	// Vérifier si la prochaine direction est sûre
+	if((hautOccupeMur && basOccupeMur) || (droiteOccupeMur && gaucheOccupeMur))
+	{
+		prochaineDirection = directionActuelle;
+	}
+	else
+	{
+		if (prochaineDirection == TOUCHE_DROITE && (droiteOccupeMur || droiteOccupeCorps)) // Si on veut aller à droite mais qu'on peut pas, aller à gauche
+		{
+			if (directionActuelle != TOUCHE_GAUCHE)
+			{
+				prochaineDirection = TOUCHE_GAUCHE;
+			} else if (tableau[yTete - 1][xTete] == CHAR_VIDE)
+			{
+				prochaineDirection = TOUCHE_HAUT;
+			} else
+			{
+				prochaineDirection = TOUCHE_BAS;
+			}
+		}
+		else if (prochaineDirection == TOUCHE_GAUCHE && (gaucheOccupeMur || gaucheOccupeCorps))
+		{
+			if (directionActuelle != TOUCHE_DROITE)
+			{
+				prochaineDirection = TOUCHE_DROITE;
+			} else if (tableau[yTete - 1][xTete] == CHAR_VIDE)
+			{
+				prochaineDirection = TOUCHE_HAUT;
+			} else
+			{
+				prochaineDirection = TOUCHE_BAS;
+			}
+		}
+		else if (prochaineDirection == TOUCHE_HAUT && (hautOccupeMur || hautOccupeCorps))
+		{
+			if (directionActuelle != TOUCHE_BAS)
+			{
+				prochaineDirection = TOUCHE_BAS;
+			} else if (tableau[yTete][xTete + 1] == CHAR_VIDE)
+			{
+				prochaineDirection = TOUCHE_DROITE;
+			} else
+			{
+				prochaineDirection = TOUCHE_GAUCHE;
+			}
+		}
+		else if (prochaineDirection == TOUCHE_BAS && (basOccupeMur || basOccupeCorps))
+		{
+			if (tableau[yTete][xTete + 1] == CHAR_VIDE)
+			{
+				prochaineDirection = TOUCHE_HAUT;
+			} else if (directionActuelle != TOUCHE_HAUT)
+			{
+				prochaineDirection = TOUCHE_DROITE;
+			} else
+			{
+				prochaineDirection = TOUCHE_GAUCHE;
+			}
+		}
+	}
+
 	if (tableau[prochainY][prochainX] == CHAR_VIDE || tableau[prochainY][prochainX] == CHAR_POMME) {
 		prochainSafe = true;
 	}
 
-	if (!prochainSafe) {
-		if (cibleX > xTete && tableau[yTete][xTete + 1] == CHAR_VIDE) {
+	if (!prochainSafe)
+	{
+		if (cibleX > xTete && tableau[yTete][xTete + 1] == CHAR_VIDE)
+		{
 			prochaineDirection = TOUCHE_DROITE;
-		} else if (cibleX < xTete && tableau[yTete][xTete - 1] == CHAR_VIDE) {
+		} else if (cibleX < xTete && tableau[yTete][xTete - 1] == CHAR_VIDE)
+		{
 			prochaineDirection = TOUCHE_GAUCHE;
-		} else if (cibleY < yTete && tableau[yTete - 1][xTete] == CHAR_VIDE) {
+		} else if (cibleY < yTete && tableau[yTete - 1][xTete] == CHAR_VIDE)
+		{
 			prochaineDirection = TOUCHE_HAUT;
-		} else if (cibleY > yTete && tableau[yTete + 1][xTete] == CHAR_VIDE) {
+		} else if (cibleY > yTete && tableau[yTete + 1][xTete] == CHAR_VIDE)
+		{
 			prochaineDirection = TOUCHE_BAS;
 		}
 	}
 
-	// Vérifier si la prochaine direction est sûre
-	if (prochaineDirection == TOUCHE_DROITE && (tableau[yTete][xTete + 1] == CHAR_OBSTACLE || tableau[yTete][xTete + 1] == CHAR_CORPS)) {
-		if (directionActuelle != TOUCHE_GAUCHE) {
-			prochaineDirection = TOUCHE_GAUCHE;
-		} else if (tableau[yTete - 1][xTete] == CHAR_VIDE) {
-			prochaineDirection = TOUCHE_HAUT;
-		} else {
-			prochaineDirection = TOUCHE_BAS;
-		}
-	} else if (prochaineDirection == TOUCHE_GAUCHE && (tableau[yTete][xTete - 1] == CHAR_OBSTACLE || tableau[yTete][xTete - 1] == CHAR_CORPS)) {
-		if (directionActuelle != TOUCHE_DROITE) {
-			prochaineDirection = TOUCHE_DROITE;
-		} else if (tableau[yTete - 1][xTete] == CHAR_VIDE) {
-			prochaineDirection = TOUCHE_HAUT;
-		} else {
-			prochaineDirection = TOUCHE_BAS;
-		}
-	} else if (prochaineDirection == TOUCHE_HAUT && (tableau[yTete - 1][xTete] == CHAR_OBSTACLE || tableau[yTete - 1][xTete] == CHAR_CORPS)) {
-		if (directionActuelle != TOUCHE_BAS) {
-			prochaineDirection = TOUCHE_BAS;
-		} else if (tableau[yTete][xTete + 1] == CHAR_VIDE) {
-			prochaineDirection = TOUCHE_DROITE;
-		} else {
-			prochaineDirection = TOUCHE_GAUCHE;
-		}
-	} else if (prochaineDirection == TOUCHE_BAS && (tableau[yTete + 1][xTete] == CHAR_OBSTACLE || tableau[yTete + 1][xTete] == CHAR_CORPS)) {
-		if (directionActuelle != TOUCHE_HAUT) {
-			prochaineDirection = TOUCHE_HAUT;
-		} else if (tableau[yTete][xTete + 1] == CHAR_VIDE) {
-			prochaineDirection = TOUCHE_DROITE;
-		} else {
-			prochaineDirection = TOUCHE_GAUCHE;
-		}
-	}
-
+	
 	return prochaineDirection;
 }
 
