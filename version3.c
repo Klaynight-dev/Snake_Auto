@@ -17,6 +17,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <string.h>
 #include <time.h>
 #include <math.h>
 
@@ -45,8 +46,9 @@ clock_t tempsCPUFin = 0;
  *
  * Le programme principal exécute le code du jeu
  */
-int main()
+int main(int argc, char *argv[])
 {
+
 	int positionsX[TAILLE_MAX_SERPENT];
 	int positionsY[TAILLE_MAX_SERPENT];
 	int x, y;
@@ -55,6 +57,7 @@ int main()
 	bool aQuitte = false;
 	bool estMort = false;
 	bool aGagne = false;
+	bool debug = false;
 	tempsCPUDepart = clock(); // Calculer le temps CPU utilisé
 
 
@@ -73,7 +76,10 @@ int main()
 	ajouterPomme(nbPommesMangees);
 	detecterPomme(&pommeDetecX, &pommeDetecY);
     disableEcho();
-
+	if(argc == 2 && argv[1][1] == 'd')
+	{
+		debug = true;
+	}
     while (!devraitQuitter) // Boucle du jeu
     {
 		usleep((__useconds_t)vitesseJeu);
@@ -103,8 +109,11 @@ int main()
 
         dessinerPlateau(); // Redessiner le tableau de jeu avec le serpent mis à jour
 		detecterPomme(&pommeDetecX, &pommeDetecY);
+		if(debug)
+		{
+	        devInfo(positionsX, positionsY, direction); // Afficher les informations du jeu à l'écran
 
-        devInfo(positionsX, positionsY, direction); // Afficher les informations du jeu à l'écran
+		}
     }
 
     enableEcho(); // Réactiver l'écho
