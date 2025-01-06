@@ -583,6 +583,11 @@ char choisirDirection(int xTete, int yTete, char directionActuelle, int cibleX, 
 	bool gaucheOccupeCorps = tableau[yTete][xTete - 1] == CHAR_CORPS;
 	bool droiteOccupeCorps = tableau[yTete][xTete + 1] == CHAR_CORPS;
 
+	bool hautOccupe = hautOccupeMur || hautOccupeCorps;
+	bool basOccupe = basOccupeMur || basOccupeCorps;
+	bool gaucheOccupe = gaucheOccupeMur || gaucheOccupeCorps;
+	bool droiteOccupe = droiteOccupeMur || droiteOccupeCorps;
+
 	if (distanceDroite < distanceActuelle) {
 		prochaineDirection = TOUCHE_DROITE;
 	}
@@ -670,6 +675,24 @@ char choisirDirection(int xTete, int yTete, char directionActuelle, int cibleX, 
 				prochaineDirection = TOUCHE_GAUCHE;
 			}
 		}
+
+		if(hautOccupe && basOccupe && droiteOccupe)
+		{
+			prochaineDirection = TOUCHE_GAUCHE;
+		}
+		if(droiteOccupe && gaucheOccupe && basOccupe)
+		{
+			prochaineDirection = TOUCHE_HAUT;
+		}
+		if(hautOccupe && basOccupe && gaucheOccupe)
+		{
+			prochaineDirection = TOUCHE_DROITE;
+		}
+		if(droiteOccupe && gaucheOccupe && hautOccupe)
+		{
+			prochaineDirection = TOUCHE_BAS;
+		}
+
 	}
 
 	if (tableau[prochainY][prochainX] == CHAR_VIDE || tableau[prochainY][prochainX] == CHAR_POMME) {
