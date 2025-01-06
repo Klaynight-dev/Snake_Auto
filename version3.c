@@ -34,6 +34,8 @@ int pommeDetecX = 0;
 int pommeDetecY = 0;
 int nbPommesMangees = 0; // On traque combien de pommes on mange pour pouvoir faire apparaitre la bonne une fois mangée
 
+bool speed = false; // Mode speedrun
+
 int nbrMouvements = 0;
 clock_t tempsCPUDepart = 0;
 clock_t tempsCPUFin = 0;
@@ -57,7 +59,7 @@ int main(int argc, char *argv[])
 	bool aQuitte = false;
 	bool estMort = false;
 	bool aGagne = false;
-	bool debug = false;
+	bool debug = false; // Mode debug
 	tempsCPUDepart = clock(); // Calculer le temps CPU utilisé
 
 
@@ -65,6 +67,31 @@ int main(int argc, char *argv[])
 	y = Y_DEBUT;
 
     effacerEcran(); // Préparer le jeu
+
+	if (argc >= 2) {
+		for (int i = 1; i < argc; i++) {
+			if (argv[i][0] == '-') {
+				for (int j = 1; argv[i][j] != '\0'; j++) {
+					if (argv[i][j] == 'd') { // Si l'utilisateur a passé l'argument -d, activer le mode debug
+						debug = true;
+					} else if (argv[i][j] == 's') { // Si l'utilisateur a passé l'argument -s, activer le mode speedrun
+						speed = true;
+					} else if (argv[i][j] == 'h') { // Si l'utilisateur a passé l'argument -h, afficher l'aide
+						printf("Aide :\n");
+						printf("  -d : Activer le mode debug\n");
+						printf("  -s : Activer le mode speedrun\n");
+						printf("  -h : Afficher l'aide\n");
+						printf("  -v : Afficher la version\n");
+						return EXIT_SUCCESS;
+					} else if (argv[i][j] == 'v') { // Si l'utilisateur a passé l'argument -v, afficher la version
+						printf("Version 3.3\n");
+						return EXIT_SUCCESS;
+					}
+				}
+			}
+		}
+	}
+
     genererSerpent(positionsX, positionsY, x, y);
     initPlateau();
 
@@ -76,13 +103,16 @@ int main(int argc, char *argv[])
 	ajouterPomme(nbPommesMangees);
 	detecterPomme(&pommeDetecX, &pommeDetecY);
     disableEcho();
-	if(argc == 2 && argv[1][1] == 'd')
-	{
-		debug = true;
-	}
+
     while (!devraitQuitter) // Boucle du jeu
     {
-		usleep((__useconds_t)vitesseJeu);
+		if (speed) // Si le mode speedrun est activé, accélérer le jeu
+		{
+			usleep((__useconds_t)VITESSE_SPEEDRUN);
+		} else {
+			usleep((__useconds_t)vitesseJeu);
+		}
+		
 
 		aQuitte = checkAKeyPress(); // Si l'utilisateur veut quitter, mettre aQuitte = true
 		
@@ -109,6 +139,7 @@ int main(int argc, char *argv[])
 
         dessinerPlateau(); // Redessiner le tableau de jeu avec le serpent mis à jour
 		detecterPomme(&pommeDetecX, &pommeDetecY);
+
 		if(debug)
 		{
 	        devInfo(positionsX, positionsY, direction); // Afficher les informations du jeu à l'écran
