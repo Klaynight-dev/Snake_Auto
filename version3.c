@@ -7,7 +7,9 @@
  \date last 12 décembre 2024
  \brief Un snake pour la SAE 1.02 Comparaison d'Approches Algorithmiques
   Afin de démarrer avec GCC sans erreur, il vous faut effectuer la commande si dessous : 
- -> gcc ./version3.c -Wall -lm
+ -> gcc ./version3.c -o main -Wall -lm
+ -> main -h | main -v | main -d | main -s | main -ds etc
+    Il permette : -h pour l'aide, -v pour la version, -d pour le mode debug, -s pour le mode speedrun
 **/
 
 // Bibliotèques
@@ -20,25 +22,9 @@
 #include <string.h>
 #include <time.h>
 #include <math.h>
+#include <limits.h>
 
 #include "defconst.h"
-
-t_plateau tableau;
-int tailleSerpent = TAILLE_SERPENT;
-int vitesseJeu = VITESSE_JEU_INITIALE;
-int lesPommesX[NB_POMMES] = {75, 75, 78, 2, 8, 78, 74, 2, 72, 5};
-int lesPommesY[NB_POMMES] = {8, 39, 2, 2, 5, 39, 33, 38, 35, 2};
-int lesPavesX[NB_PAVES] = { 3, 74, 3, 74, 38, 38};
-int lesPavesY[NB_PAVES] = { 3, 3, 34, 34, 21, 15};
-int pommeDetecX = 0;
-int pommeDetecY = 0;
-int nbPommesMangees = 0; // On traque combien de pommes on mange pour pouvoir faire apparaitre la bonne une fois mangée
-
-bool speed = false; // Mode speedrun
-
-int nbrMouvements = 0;
-clock_t tempsCPUDepart = 0;
-clock_t tempsCPUFin = 0;
 
 
 /**
@@ -84,7 +70,7 @@ int main(int argc, char *argv[])
 						printf("  -v : Afficher la version\n");
 						return EXIT_SUCCESS;
 					} else if (argv[i][j] == 'v') { // Si l'utilisateur a passé l'argument -v, afficher la version
-						printf("Version 3.3\n");
+						printf("Version 3.51\n");
 						return EXIT_SUCCESS;
 					}
 				}
@@ -177,6 +163,14 @@ void devInfo(int positionsX[20], int positionsY[20], char direction)
                                                                                                   : "Bas");
 	printf("Pomme : %d, %d\n", pommeDetecX, pommeDetecY);
 	printf("\033[A\033[2K"); // Efface la ligne précédente
+
+	//printf("Distance directe: %d\t\t", distanceDirecte);
+    //printf("Distance via trou droit: %d\t\t", distanceViaTrouD);
+    //printf("Distance via trou gauche: %d\t\t", distanceViaTrouG);
+    //printf("Distance via trou haut: %d\t\t", distanceViaTrouH);
+    //printf("Distance via trou bas: %d\t\t", distanceViaTrouB);
+	//printf("Cible choisie : (%d, %d)\n", cible[0], cible[1]);
+	//printf("\033[A\033[2K"); // Efface la ligne précédente
 }
 
 /**
@@ -598,230 +592,176 @@ int distanceCarree(int x1, int y1, int x2, int y2) {
 }
 
 // Cette fonction gère la logique du changement de direction, avec la cible et les trous
-// c'EST INFERNAL C'EST SUPER LONG PTNFSDIUHGOUSDYGISUYRGISDURYGJYHG
-char choisirDirection(int xTete, int yTete, char directionActuelle, int cibleX, int cibleY)
-{
-	char prochaineDirection = directionActuelle;
-	bool prochainSafe = false;
 
-	int prochainX = xTete;
-	int prochainY = yTete;
+int getNodeIndex(int x, int y) {
+	return y * TAILLE_TABLEAU_X + x;
+}
 
-	int distanceActuelle = distanceCarree(xTete, yTete, cibleX, cibleY);
-	int distanceDroite = distanceCarree(xTete + 1, yTete, cibleX, cibleY);
-	int distanceGauche = distanceCarree(xTete - 1, yTete, cibleX, cibleY);
-	int distanceHaut = distanceCarree(xTete, yTete - 1, cibleX, cibleY);
-	int distanceBas = distanceCarree(xTete, yTete + 1, cibleX, cibleY);
+int heuristic(int x1, int y1, int x2, int y2) {
+	return abs(x1 - x2) + abs(y1 - y2);
+}
 
-	bool hautOccupeMur = tableau[yTete - 1][xTete] == CHAR_OBSTACLE ;
-	bool basOccupeMur = tableau[yTete + 1][xTete] == CHAR_OBSTACLE;
-	bool gaucheOccupeMur = tableau[yTete][xTete - 1] == CHAR_OBSTACLE ;
-	bool droiteOccupeMur = tableau[yTete][xTete + 1] == CHAR_OBSTACLE;
-
-	bool hautOccupeCorps = tableau[yTete - 1][xTete] == CHAR_CORPS;
-	bool basOccupeCorps = tableau[yTete + 1][xTete] == CHAR_CORPS;
-	bool gaucheOccupeCorps = tableau[yTete][xTete - 1] == CHAR_CORPS;
-	bool droiteOccupeCorps = tableau[yTete][xTete + 1] == CHAR_CORPS;
-
-	bool hautOccupe = hautOccupeMur || hautOccupeCorps;
-	bool basOccupe = basOccupeMur || basOccupeCorps;
-	bool gaucheOccupe = gaucheOccupeMur || gaucheOccupeCorps;
-	bool droiteOccupe = droiteOccupeMur || droiteOccupeCorps;
-
-	if (distanceDroite < distanceActuelle) {
-		prochaineDirection = TOUCHE_DROITE;
+Node* getLowestFCostNode() {
+	int lowestFCost = INT_MAX;
+	Node* lowestNode = NULL;
+	for (int i = 0; i < MAX_NODES; i++) {
+		if (openSet[i] && nodes[i].fCost < lowestFCost) {
+			lowestFCost = nodes[i].fCost;
+			lowestNode = &nodes[i];
+		}
 	}
-	if (distanceGauche < distanceActuelle) {
-		prochaineDirection = TOUCHE_GAUCHE;
-	}
-	if (distanceHaut < distanceActuelle) {
-		prochaineDirection = TOUCHE_HAUT;
-	}
-	if (distanceBas < distanceActuelle) {
-		prochaineDirection = TOUCHE_BAS;
-	}
+	return lowestNode;
+}
 
-	switch (prochaineDirection) {
-		case TOUCHE_DROITE:
-			prochainX = xTete + 1;
-			break;
-		case TOUCHE_GAUCHE:
-			prochainX = xTete - 1;
-			break;
-		case TOUCHE_HAUT:
-			prochainY = yTete - 1;
-			break;
-		case TOUCHE_BAS:
-			prochainY = yTete + 1;
-			break;
+void reconstructPath(Node* current, int* pathX, int* pathY, int* pathLength) {
+	*pathLength = 0;
+	while (current != NULL) {
+		pathX[*pathLength] = current->x;
+		pathY[*pathLength] = current->y;
+		(*pathLength)++;
+		current = current->parent;
+	}
+	// Reverse the path
+	for (int i = 0; i < *pathLength / 2; i++) {
+		int tempX = pathX[i];
+		int tempY = pathY[i];
+		pathX[i] = pathX[*pathLength - 1 - i];
+		pathY[i] = pathY[*pathLength - 1 - i];
+		pathX[*pathLength - 1 - i] = tempX;
+		pathY[*pathLength - 1 - i] = tempY;
+	}
+}
+
+bool aStar(int startX, int startY, int goalX, int goalY, int* pathX, int* pathY, int* pathLength) {
+	for (int i = 0; i < MAX_NODES; i++) {
+		openSet[i] = false;
+		closedSet[i] = false;
+		nodes[i].parent = NULL;
+		nodes[i].gCost = INT_MAX;
+		nodes[i].hCost = 0;
+		nodes[i].fCost = INT_MAX;
 	}
 
-	// Vérifier si la prochaine direction est sûre
-	if((hautOccupeMur && basOccupeMur) || (droiteOccupeMur && gaucheOccupeMur))
-	{
-		prochaineDirection = directionActuelle;
-	}
-	else
-	{
-		if (prochaineDirection == TOUCHE_DROITE && (droiteOccupeMur || droiteOccupeCorps)) // Si on veut aller à droite mais qu'on peut pas, aller à gauche
-		{
-			if (directionActuelle != TOUCHE_GAUCHE)
-			{
-				prochaineDirection = TOUCHE_GAUCHE;
-			} else if (tableau[yTete - 1][xTete] == CHAR_VIDE)
-			{
-				prochaineDirection = TOUCHE_HAUT;
-			} else
-			{
-				prochaineDirection = TOUCHE_BAS;
+	int startIndex = getNodeIndex(startX, startY);
+	nodes[startIndex].x = startX;
+	nodes[startIndex].y = startY;
+	nodes[startIndex].gCost = 0;
+	nodes[startIndex].hCost = heuristic(startX, startY, goalX, goalY);
+	nodes[startIndex].fCost = nodes[startIndex].hCost;
+	openSet[startIndex] = true;
+
+	while (true) {
+		Node* current = getLowestFCostNode();
+		if (current == NULL) {
+			return false; // No path found
+		}
+
+		int currentIndex = getNodeIndex(current->x, current->y);
+		if (current->x == goalX && current->y == goalY) {
+			reconstructPath(current, pathX, pathY, pathLength);
+			return true;
+		}
+
+		openSet[currentIndex] = false;
+		closedSet[currentIndex] = true;
+
+		int neighbors[4][2] = {
+			{current->x + 1, current->y},
+			{current->x - 1, current->y},
+			{current->x, current->y + 1},
+			{current->x, current->y - 1}
+		};
+
+		for (int i = 0; i < 4; i++) {
+			int neighborX = neighbors[i][0];
+			int neighborY = neighbors[i][1];
+			if (neighborX < 0 || neighborX >= TAILLE_TABLEAU_X || neighborY < 0 || neighborY >= TAILLE_TABLEAU_Y) {
+				continue;
 			}
-		}
-		else if (prochaineDirection == TOUCHE_GAUCHE && (gaucheOccupeMur || gaucheOccupeCorps))
-		{
-			if (directionActuelle != TOUCHE_DROITE)
-			{
-				prochaineDirection = TOUCHE_DROITE;
-			} else if (tableau[yTete - 1][xTete] == CHAR_VIDE)
-			{
-				prochaineDirection = TOUCHE_HAUT;
-			} else
-			{
-				prochaineDirection = TOUCHE_BAS;
+			if (tableau[neighborY][neighborX] == CHAR_OBSTACLE || tableau[neighborY][neighborX] == CHAR_CORPS) {
+				continue;
 			}
-		}
-		else if (prochaineDirection == TOUCHE_HAUT && (hautOccupeMur || hautOccupeCorps))
-		{
-			if (directionActuelle != TOUCHE_BAS)
-			{
-				prochaineDirection = TOUCHE_BAS;
-			} else if (tableau[yTete][xTete + 1] == CHAR_VIDE)
-			{
-				prochaineDirection = TOUCHE_DROITE;
-			} else
-			{
-				prochaineDirection = TOUCHE_GAUCHE;
+
+			int neighborIndex = getNodeIndex(neighborX, neighborY);
+			if (closedSet[neighborIndex]) {
+				continue;
 			}
-		}
-		else if (prochaineDirection == TOUCHE_BAS && (basOccupeMur || basOccupeCorps))
-		{
-			if (tableau[yTete][xTete + 1] == CHAR_VIDE)
-			{
-				prochaineDirection = TOUCHE_HAUT;
-			} else if (directionActuelle != TOUCHE_HAUT)
-			{
-				prochaineDirection = TOUCHE_DROITE;
-			} else
-			{
-				prochaineDirection = TOUCHE_GAUCHE;
+
+			int tentativeGCost = current->gCost + 1;
+			if (!openSet[neighborIndex]) {
+				openSet[neighborIndex] = true;
+			} else if (tentativeGCost >= nodes[neighborIndex].gCost) {
+				continue;
 			}
-		}
 
-		if(hautOccupe && basOccupe && droiteOccupe)
-		{
-			prochaineDirection = TOUCHE_GAUCHE;
-		}
-		if(droiteOccupe && gaucheOccupe && basOccupe)
-		{
-			prochaineDirection = TOUCHE_HAUT;
-		}
-		if(hautOccupe && basOccupe && gaucheOccupe)
-		{
-			prochaineDirection = TOUCHE_DROITE;
-		}
-		if(droiteOccupe && gaucheOccupe && hautOccupe)
-		{
-			prochaineDirection = TOUCHE_BAS;
-		}
-
-	}
-
-	if (tableau[prochainY][prochainX] == CHAR_VIDE || tableau[prochainY][prochainX] == CHAR_POMME) {
-		prochainSafe = true;
-	}
-
-	if (!prochainSafe)
-	{
-		if (cibleX > xTete && tableau[yTete][xTete + 1] == CHAR_VIDE)
-		{
-			prochaineDirection = TOUCHE_DROITE;
-		} else if (cibleX < xTete && tableau[yTete][xTete - 1] == CHAR_VIDE)
-		{
-			prochaineDirection = TOUCHE_GAUCHE;
-		} else if (cibleY < yTete && tableau[yTete - 1][xTete] == CHAR_VIDE)
-		{
-			prochaineDirection = TOUCHE_HAUT;
-		} else if (cibleY > yTete && tableau[yTete + 1][xTete] == CHAR_VIDE)
-		{
-			prochaineDirection = TOUCHE_BAS;
+			nodes[neighborIndex].x = neighborX;
+			nodes[neighborIndex].y = neighborY;
+			nodes[neighborIndex].gCost = tentativeGCost;
+			nodes[neighborIndex].hCost = heuristic(neighborX, neighborY, goalX, goalY);
+			nodes[neighborIndex].fCost = nodes[neighborIndex].gCost + nodes[neighborIndex].hCost;
+			nodes[neighborIndex].parent = current;
 		}
 	}
+}
 
-	
-	return prochaineDirection;
+char choisirDirection(int xTete, int yTete, char directionActuelle, int cibleX, int cibleY) {
+	int pathX[TAILLE_TABLEAU_X * TAILLE_TABLEAU_Y];
+	int pathY[TAILLE_TABLEAU_X * TAILLE_TABLEAU_Y];
+	int pathLength;
+
+	if (aStar(xTete, yTete, cibleX, cibleY, pathX, pathY, &pathLength) && pathLength > 1) {
+		int nextX = pathX[1];
+		int nextY = pathY[1];
+
+		if (nextX > xTete) return TOUCHE_DROITE;
+		if (nextX < xTete) return TOUCHE_GAUCHE;
+		if (nextY > yTete) return TOUCHE_BAS;
+		if (nextY < yTete) return TOUCHE_HAUT;
+	}
+
+	return directionActuelle;
 }
 
 // Cette fonction détermine la cible vers laquelle le serpent doit se diriger, en tenant compte des trous
 void determinerCible(int cible[2], int positionsX[TAILLE_MAX_SERPENT], int positionsY[TAILLE_MAX_SERPENT])
 {
-	// Si le serpent est à plus de la moitié de la map dans une direction ou l'autre
-	// de la pomme, la cible est le trou opposé
 	int xTeteSerpent = positionsX[0];
 	int yTeteSerpent = positionsY[0];
 
-	// int xQueueSerpent = positionsX[tailleSerpent - 1];
-	// int yQueueSerpent = positionsY[tailleSerpent - 1];
+	int distanceDirecte = distanceCarree(xTeteSerpent, yTeteSerpent, pommeDetecX, pommeDetecY);
 
-	int distanceAuTrouD = distanceCarree(xTeteSerpent, yTeteSerpent, TAILLE_TABLEAU_X - 1, MOITIE_HAUTEUR_TABLEAU);
-	int distanceAuTrouG = distanceCarree(xTeteSerpent, yTeteSerpent, 1, MOITIE_HAUTEUR_TABLEAU);
-	int distanceAuTrouH = distanceCarree(xTeteSerpent, yTeteSerpent, MOITIE_LARGEUR_TABLEAU, 1);
-	int distanceAuTrouB = distanceCarree(xTeteSerpent, yTeteSerpent, MOITIE_LARGEUR_TABLEAU, TAILLE_TABLEAU_Y - 1);
+	int distanceViaTrouD = distanceCarree(xTeteSerpent, yTeteSerpent, TAILLE_TABLEAU_X - 1, MOITIE_HAUTEUR_TABLEAU) +
+						   distanceCarree(1, MOITIE_HAUTEUR_TABLEAU, pommeDetecX, pommeDetecY);
+	int distanceViaTrouG = distanceCarree(xTeteSerpent, yTeteSerpent, 1, MOITIE_HAUTEUR_TABLEAU) +
+						   distanceCarree(TAILLE_TABLEAU_X - 2, MOITIE_HAUTEUR_TABLEAU, pommeDetecX, pommeDetecY);
+	int distanceViaTrouH = distanceCarree(xTeteSerpent, yTeteSerpent, MOITIE_LARGEUR_TABLEAU, 1) +
+						   distanceCarree(MOITIE_LARGEUR_TABLEAU, TAILLE_TABLEAU_Y - 2, pommeDetecX, pommeDetecY);
+	int distanceViaTrouB = distanceCarree(xTeteSerpent, yTeteSerpent, MOITIE_LARGEUR_TABLEAU, TAILLE_TABLEAU_Y - 1) +
+						   distanceCarree(MOITIE_LARGEUR_TABLEAU, 2, pommeDetecX, pommeDetecY);
 
-	if( abs(xTeteSerpent - pommeDetecX) > MOITIE_LARGEUR_TABLEAU) // Si le serpent est à plus de la moitié de la map de la pomme dans la largeur
-	{
-		if (xTeteSerpent > pommeDetecX) // Si le serpent est à droite de la pomme
-		{
-			if(distanceAuTrouD < distanceAuTrouH) // Si c'est plus avantageux de passer par la droite que par le haut
-			{
-				cible[0] = TAILLE_TABLEAU_X - 1; // Aller vers le trou droit
-				cible[1] = MOITIE_HAUTEUR_TABLEAU;
-			}
-			else // Sinon
-			{
-				cible[0] = MOITIE_LARGEUR_TABLEAU; // Aller vers le trou haut
-				cible[1] = 1;
-			}
-		}
-		else // Si le serpent est à gauche de la pomme
-		{
-			if(distanceAuTrouG < distanceAuTrouB) // Si c'est plus avantageux de passer par la gauche que par le bas
-			{
-				cible[0] = 1; // Aller vers le trou gauche
-				cible[1] = MOITIE_HAUTEUR_TABLEAU;
-			}
-			else // Sinon
-			{
-				cible[0] = MOITIE_LARGEUR_TABLEAU; // Aller vers le trou bas
-				cible[1] = TAILLE_TABLEAU_Y - 1;
-			}
-		}
+	int distanceMin = distanceDirecte;
+	cible[0] = pommeDetecX;
+	cible[1] = pommeDetecY;
+
+	if (distanceViaTrouD < distanceMin) {
+		distanceMin = distanceViaTrouD;
+		cible[0] = TAILLE_TABLEAU_X - 1;
+		cible[1] = MOITIE_HAUTEUR_TABLEAU;
 	}
-	else if( abs(yTeteSerpent - pommeDetecY) > MOITIE_HAUTEUR_TABLEAU) // Si le serpent est à plus de la moitié de la map de la pomme dans la hauteur
-	{
-		if (yTeteSerpent > pommeDetecY) // Si le serpent est au dessus de la pomme
-		{
-			cible[0] = MOITIE_LARGEUR_TABLEAU;
-			cible[1] = TAILLE_TABLEAU_Y - 1; // Trou bas
-		}
-		else
-		{
-			cible[0] = MOITIE_LARGEUR_TABLEAU;
-			cible[1] = 1; // Trou haut
-		}
+	if (distanceViaTrouG < distanceMin) {
+		distanceMin = distanceViaTrouG;
+		cible[0] = 1;
+		cible[1] = MOITIE_HAUTEUR_TABLEAU;
 	}
-	else
-	{
-		cible[0] = pommeDetecX;
-		cible[1] = pommeDetecY;
+	if (distanceViaTrouH < distanceMin) {
+		distanceMin = distanceViaTrouH;
+		cible[0] = MOITIE_LARGEUR_TABLEAU;
+		cible[1] = 1;
+	}
+	if (distanceViaTrouB < distanceMin) {
+		distanceMin = distanceViaTrouB;
+		cible[0] = MOITIE_LARGEUR_TABLEAU;
+		cible[1] = TAILLE_TABLEAU_Y - 1;
 	}
 }
 
