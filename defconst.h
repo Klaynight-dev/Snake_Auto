@@ -136,6 +136,8 @@
 
 #define NB_PAVES 6
 
+#define MAX_NODES (TAILLE_TABLEAU_X * TAILLE_TABLEAU_Y)
+
 /************************************************
  *                                              *
  *          Définition des fonctions            *
@@ -185,3 +187,29 @@ void determinerCible(int cible[2], int positionsX[TAILLE_MAX_SERPENT], int posit
 
 
 typedef char t_plateau[TAILLE_TABLEAU_Y][TAILLE_TABLEAU_X];
+typedef struct {
+	int x, y;
+	int gCost, hCost, fCost;
+	struct Node* parent;
+} Node;
+
+Node nodes[MAX_NODES];
+bool openSet[MAX_NODES];
+bool closedSet[MAX_NODES];
+
+t_plateau tableau;
+int tailleSerpent = TAILLE_SERPENT;
+int vitesseJeu = VITESSE_JEU_INITIALE;
+int lesPommesX[NB_POMMES] = {75, 75, 78, 2, 8, 78, 74, 2, 72, 5};
+int lesPommesY[NB_POMMES] = {8, 39, 2, 2, 5, 39, 33, 38, 35, 2};
+int lesPavesX[NB_PAVES] = { 3, 74, 3, 74, 38, 38};
+int lesPavesY[NB_PAVES] = { 3, 3, 34, 34, 21, 15};
+int pommeDetecX = 0;
+int pommeDetecY = 0;
+int nbPommesMangees = 0; // On traque combien de pommes on mange pour pouvoir faire apparaitre la bonne une fois mangée
+
+bool speed = false; // Mode speedrun
+
+int nbrMouvements = 0;
+clock_t tempsCPUDepart = 0;
+clock_t tempsCPUFin = 0;
