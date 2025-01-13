@@ -8,7 +8,7 @@
  \brief Un snake pour la SAE 1.02 Comparaison d'Approches Algorithmiques
   Afin de démarrer avec GCC sans erreur, il vous faut effectuer la commande si dessous : 
  -> gcc ./version3.c -o main -Wall -lm
- -> main -h | main -v | main -d | main -s | main -ds etc
+ -> main -h | main -v | main -d | main -s | les paramètres sont optionnels et peuvent être combinés (ex : -ds)
     Il permette : -h pour l'aide, -v pour la version, -d pour le mode debug, -s pour le mode speedrun
 **/
 
