@@ -8,8 +8,8 @@
  \brief Un snake pour la SAE 1.02 Comparaison d'Approches Algorithmiques
   Afin de démarrer avec GCC sans erreur, il vous faut effectuer la commande si dessous : 
  -> gcc ./version3.c -o main -Wall -lm
- -> main -h | main -v | main -d | main -s | les paramètres sont optionnels et peuvent être combinés (ex : -ds)
-    Il permette : -h pour l'aide, -v pour la version, -d pour le mode debug, -s pour le mode speedrun
+ -> main -h | main -v | main -d | main -s | main -a | les paramètres sont optionnels et peuvent être combinés (ex : -ds)
+    Il permette : -h pour l'aide, -v pour la version, -d pour le mode debug, -s pour le mode speedrun, -a pour désactiver l'affichage
 **/
 
 // Bibliotèques
@@ -68,10 +68,13 @@ int main(int argc, char *argv[])
 						printf("  -s : Activer le mode speedrun\n");
 						printf("  -h : Afficher l'aide\n");
 						printf("  -v : Afficher la version\n");
+						printf("  -a : Desactiver l'affichage\n");
 						return EXIT_SUCCESS;
 					} else if (argv[i][j] == 'v') { // Si l'utilisateur a passé l'argument -v, afficher la version
 						printf("Version 3.51\n");
 						return EXIT_SUCCESS;
+					} else if (argv[i][j] == 'a') { // Si l'utilisateur a passé l'argument -a, activer l'affichage
+						affichage = false;
 					}
 				}
 			}
@@ -92,13 +95,14 @@ int main(int argc, char *argv[])
 
     while (!devraitQuitter) // Boucle du jeu
     {
-		if (speed) // Si le mode speedrun est activé, accélérer le jeu
-		{
-			usleep((__useconds_t)VITESSE_SPEEDRUN);
-		} else {
-			usleep((__useconds_t)vitesseJeu);
+		if (affichage) {
+			if (speed) // Si le mode speedrun est activé, accélérer le jeu
+			{
+				usleep((__useconds_t)VITESSE_SPEEDRUN);
+			} else {
+				usleep((__useconds_t)vitesseJeu);
+			}
 		}
-		
 
 		aQuitte = checkAKeyPress(); // Si l'utilisateur veut quitter, mettre aQuitte = true
 		
@@ -126,7 +130,7 @@ int main(int argc, char *argv[])
         dessinerPlateau(); // Redessiner le tableau de jeu avec le serpent mis à jour
 		detecterPomme(&pommeDetecX, &pommeDetecY);
 
-		if(debug)
+		if(debug && affichage) // Si le mode debug est activé, afficher les informations du jeu
 		{
 	        devInfo(positionsX, positionsY, direction); // Afficher les informations du jeu à l'écran
 
@@ -265,8 +269,11 @@ int checkAKeyPress()
 // Definition des fonctions demandées
 void afficher(int x, int y, char c)
 {
-	gotoXY(x, y);
-	printf("%c", c);
+	if (affichage)
+	{
+		gotoXY(x, y);
+		printf("%c", c);
+	}
 }
 
 // Efface un caractère
@@ -339,6 +346,7 @@ void ajouterPomme(int indice)
 	// }
 	tableau[y][x] = CHAR_POMME;
 	afficher(x, y, CHAR_POMME);
+	
 	fflush(stdout);
 
 }

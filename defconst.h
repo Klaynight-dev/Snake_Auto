@@ -187,10 +187,10 @@ void determinerCible(int cible[2], int positionsX[TAILLE_MAX_SERPENT], int posit
 
 
 typedef char t_plateau[TAILLE_TABLEAU_Y][TAILLE_TABLEAU_X];
-typedef struct {
-	int x, y;
-	int gCost, hCost, fCost;
-	struct Node* parent;
+typedef struct Node {
+    int x, y;
+    int gCost, hCost, fCost;
+    struct Node* parent;
 } Node;
 
 Node nodes[MAX_NODES];
@@ -209,6 +209,8 @@ int pommeDetecY = 0;
 int nbPommesMangees = 0; // On traque combien de pommes on mange pour pouvoir faire apparaitre la bonne une fois mangée
 
 bool speed = false; // Mode speedrun
+bool debug = false; // Mode debug
+bool affichage = true; // Mode affichage
 
 int nbrMouvements = 0;
 clock_t tempsCPUDepart = 0;
