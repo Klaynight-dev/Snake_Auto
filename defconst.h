@@ -200,10 +200,10 @@ bool closedSet[MAX_NODES];
 t_plateau tableau;
 int tailleSerpent = TAILLE_SERPENT;
 int vitesseJeu = VITESSE_JEU_INITIALE;
-int lesPommesX[NB_POMMES] = {75, 75, 78, 2, 8, 78, 74, 2, 72, 5};
-int lesPommesY[NB_POMMES] = {8, 39, 2, 2, 5, 39, 33, 38, 35, 2};
-int lesPavesX[NB_PAVES] = { 3, 74, 3, 74, 38, 38};
-int lesPavesY[NB_PAVES] = { 3, 3, 34, 34, 21, 15};
+int lesPommesX[NB_POMMES] = {40, 75, 78, 2, 9, 78, 74, 2, 72, 5};
+int lesPommesY[NB_POMMES] = {20, 38, 2, 2, 5, 38, 32, 38, 32, 2};
+int lesPavesX[NB_PAVES] = { 4, 73, 4, 73, 38, 38};
+int lesPavesY[NB_PAVES] = { 4, 4, 33, 33, 14, 22};
 int pommeDetecX = 0;
 int pommeDetecY = 0;
 int nbPommesMangees = 0; // On traque combien de pommes on mange pour pouvoir faire apparaitre la bonne une fois mangée
