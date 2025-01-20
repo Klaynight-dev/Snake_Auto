@@ -9,7 +9,7 @@
   Afin de démarrer avec GCC sans erreur, il vous faut effectuer la commande si dessous : 
  -> gcc ./version3.c -o main -Wall -lm
  -> main -h | main -v | main -d | main -s | main -a | les paramètres sont optionnels et peuvent être combinés (ex : -ds)
-    Ils permettent : -h pour l'aide, -v pour la version, -d pour le mode debug, -s pour le mode speedrun, -a pour désactiver l'affichage
+    Il permette : -h pour l'aide, -v pour la version, -d pour le mode debug, -s pour le mode speedrun, -a pour désactiver l'affichage
 **/
 
 // Bibliotèques
@@ -73,7 +73,7 @@ int main(int argc, char *argv[])
 					} else if (argv[i][j] == 'v') { // Si l'utilisateur a passé l'argument -v, afficher la version
 						printf("Version 3.51\n");
 						return EXIT_SUCCESS;
-					} else if (argv[i][j] == 'a') { // Si l'utilisateur a passé l'argument -a, désactiver l'affichage
+					} else if (argv[i][j] == 'a') { // Si l'utilisateur a passé l'argument -a, activer l'affichage
 						affichage = false;
 					}
 				}
