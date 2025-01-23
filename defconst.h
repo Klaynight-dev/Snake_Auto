@@ -31,7 +31,13 @@
  * \def CHAR_TETE
  * \brief Le caractère qui correspond à la tête du serpent
  */
-#define CHAR_TETE 'O'
+#define CHAR_TETE_1 '1'
+
+/**
+ * \def CHAR_TETE
+ * \brief Le caractère qui correspond à la tête du serpent
+ */
+#define CHAR_TETE_2 '2'
 
 /**
  * \def CHAR_CORPS
@@ -173,8 +179,8 @@ void devInfo(int positionsX[20], int positionsY[20], char direction);
 void dessinerPlateau();
 void afficherSerpent(int positionsX[TAILLE_MAX_SERPENT], int positionsY[TAILLE_MAX_SERPENT]);
 void effacerSerpent(int positionsX[TAILLE_MAX_SERPENT], int positionsY[TAILLE_MAX_SERPENT]);
-void progresser(int positionsX[TAILLE_MAX_SERPENT], int positionsY[TAILLE_MAX_SERPENT], char direction, bool* detecCollision);
-void serpentDansTab(int positionsX[TAILLE_MAX_SERPENT], int positionsY[TAILLE_MAX_SERPENT]);
+void progresser(int positionsX[TAILLE_MAX_SERPENT], int positionsY[TAILLE_MAX_SERPENT], char direction, bool* detecCollision, int numSerpent);
+void serpentDansTab(int positionsX[TAILLE_MAX_SERPENT], int positionsY[TAILLE_MAX_SERPENT], int numSerpent);
 
 void changerDirection(char* direction, int positionsX[TAILLE_MAX_SERPENT], int positionsY[TAILLE_MAX_SERPENT]);	
 int genererEntierDansBornes(int min, int max);
@@ -218,6 +224,9 @@ bool speed = false; // Mode speedrun
 bool debug = false; // Mode debug
 bool affichage = true; // Mode affichage
 
-int nbrMouvements = 0;
+int nbrMouvements1 = 0;
+int nbrMouvements2 = 0;
+int nbrPommes1 = 0;
+int nbrPommes2 = 0;
 clock_t tempsCPUDepart = 0;
 clock_t tempsCPUFin = 0;
