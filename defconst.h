@@ -61,7 +61,7 @@
  * \def DIRECTION_INITIALE
  * \brief La direction dans laquelle le serpent doit se déplacer au départ
  */
-#define DIRECTION_INITIALE 'd'
+#define DIRECTION_INITIALE 'g'
 
 /**
  * \def TOUCHE_DROITE
@@ -98,12 +98,6 @@
  * \brief La position horizontale à laquelle le serpent doit démarrer
  */
 #define Y_DEBUT 20
-
-/**
- * \def DIRECTION_INITIALE
- * \brief La direction dans laquelle le serpent doit se déplacer au début
- */
-#define DIRECTION_INITIALE 'd'
 
 /**
  * \def NOMBRE_PAVES
@@ -160,7 +154,7 @@ void effacer(int x, int y);
 void effacerEcran();				
 
 int checkAKeyPress();
-void genererSerpent(int positionsX[TAILLE_MAX_SERPENT], int positionsY[TAILLE_MAX_SERPENT], int x, int y);
+void genererSerpent(int positionsX[TAILLE_MAX_SERPENT], int positionsY[TAILLE_MAX_SERPENT], int x, int y, char direction);
 void initPlateau();
 void devInfo(int positionsX[20], int positionsY[20], char direction);
 

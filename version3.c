@@ -37,20 +37,16 @@
 int main(int argc, char *argv[])
 {
 
-	int positionsX[TAILLE_MAX_SERPENT];
-	int positionsY[TAILLE_MAX_SERPENT];
-	int x, y;
-	char direction = DIRECTION_INITIALE;
+	int positionsX1[TAILLE_MAX_SERPENT];
+	int positionsY1[TAILLE_MAX_SERPENT];
+
+	char direction1 = DIRECTION_INITIALE;
 	bool devraitQuitter = false;
 	bool aQuitte = false;
 	bool estMort = false;
 	bool aGagne = false;
 	bool debug = false; // Mode debug
 	tempsCPUDepart = clock(); // Calculer le temps CPU utilisé
-
-
-	x = X_DEBUT;
-	y = Y_DEBUT;
 
     effacerEcran(); // Préparer le jeu
 
@@ -81,11 +77,11 @@ int main(int argc, char *argv[])
 		}
 	}
 
-    genererSerpent(positionsX, positionsY, x, y);
+    genererSerpent(positionsX1, positionsY1, X_DEBUT, Y_DEBUT, TOUCHE_GAUCHE); // Générer le premier serpent
     initPlateau();
 
-	serpentDansTab(positionsX, positionsY);
-	genererPaves(positionsX, positionsY);
+	serpentDansTab(positionsX1, positionsY1);
+	genererPaves(positionsX1, positionsY1);
 	srand((unsigned int)time(NULL)); // Initialiser l'aléatoire
 
     dessinerPlateau(); // Afficher le tableau de jeu initial
@@ -118,21 +114,21 @@ int main(int argc, char *argv[])
             devraitQuitter = true; // Si la touche d'arrêt est pressée, quitter
         }
 		
-        changerDirection(&direction, positionsX, positionsY); // Met à jour la direction du serpent
+        changerDirection(&direction1, positionsX1, positionsY1); // Met à jour la direction du serpent
 
-        effacerSerpent(positionsX, positionsY); // Effacer le serpent avant de le déplacer
+        effacerSerpent(positionsX1, positionsY1); // Effacer le serpent avant de le déplacer
 
-		progresser(positionsX, positionsY, direction, &estMort); // Faire avancer le serpent
+		progresser(positionsX1, positionsY1, direction1, &estMort); // Faire avancer le serpent
 
         // Met à jour l'état du serpent dans le tableau
-		serpentDansTab(positionsX, positionsY); 
+		serpentDansTab(positionsX1, positionsY1); 
 
         dessinerPlateau(); // Redessiner le tableau de jeu avec le serpent mis à jour
 		detecterPomme(&pommeDetecX, &pommeDetecY);
 
 		if(debug && affichage) // Si le mode debug est activé, afficher les informations du jeu
 		{
-	        devInfo(positionsX, positionsY, direction); // Afficher les informations du jeu à l'écran
+	        devInfo(positionsX1, positionsY1, direction1); // Afficher les informations du jeu à l'écran
 
 		}
     }
@@ -155,13 +151,13 @@ int main(int argc, char *argv[])
     return EXIT_SUCCESS;
 }
 
-void devInfo(int positionsX[20], int positionsY[20], char direction)
+void devInfo(int positionsX1[20], int positionsY1[20], char direction)
 {
     // Afficher les informations du jeu
     printf("\nScore :%d/%d\t", nbPommesMangees, NB_POMMES);
     printf("Mouvements : %d\t\t", nbrMouvements);
     printf("Temps : %f\t\t", (double)(clock() - tempsCPUDepart) / CLOCKS_PER_SEC);
-    printf("Position : %d, %d\t\t", positionsX[0], positionsY[0]);
+    printf("Position : %d, %d\t\t", positionsX1[0], positionsY1[0]);
     printf("Direction : %s\t\t", direction == TOUCHE_DROITE ? "Droite" : direction == TOUCHE_GAUCHE ? "Gauche"
                                                                    : direction == TOUCHE_HAUT     ? "Haut"
                                                                                                   : "Bas");
@@ -219,17 +215,17 @@ void dessinerPlateau()
 	}
 }
 /**
- * \fn void effacerSerpent(int positionsX[TAILLE_SERPENT], int positionsY[TAILLE_SERPENT])
+ * \fn void effacerSerpent(int positionsX1[TAILLE_SERPENT], int positionsY1[TAILLE_SERPENT])
  * \brief Efface le serpent dans le tableau
  *
  * Met toutes les positions du serpent dans le tableau à la valeur de CHAR_VIDE
  */
-void effacerSerpent(int positionsX[TAILLE_MAX_SERPENT], int positionsY[TAILLE_MAX_SERPENT])
+void effacerSerpent(int positionsX1[TAILLE_MAX_SERPENT], int positionsY1[TAILLE_MAX_SERPENT])
 {
 	for (int i = 0; i < TAILLE_MAX_SERPENT; i++)
 	{
-		tableau[positionsY[i]][positionsX[i]] = CHAR_VIDE;
-		afficher(positionsX[i], positionsY[i], CHAR_VIDE);
+		tableau[positionsY1[i]][positionsX1[i]] = CHAR_VIDE;
+		afficher(positionsX1[i], positionsY1[i], CHAR_VIDE);
 	}
 }
 
@@ -239,11 +235,11 @@ void effacerSerpent(int positionsX[TAILLE_MAX_SERPENT], int positionsY[TAILLE_MA
  *
  * Met le curseur aux coordonnées x et y passées en paramètre d'entrée
  */
-void changerDirection(char* direction, int positionsX[TAILLE_MAX_SERPENT], int positionsY[TAILLE_MAX_SERPENT])
+void changerDirection(char* direction, int positionsX1[TAILLE_MAX_SERPENT], int positionsY1[TAILLE_MAX_SERPENT])
 {
-	int cible[2]; // 0 = X 1 =void	determinerCible(cible, positionsX, positionsY);
-	determinerCible(cible, positionsX, positionsY);
-	*direction = choisirDirection(positionsX[0], positionsY[0], *direction, cible[0], cible[1]);
+	int cible[2]; // 0 = X 1 =void	determinerCible(cible, positionsX1, positionsY1);
+	determinerCible(cible, positionsX1, positionsY1);
+	*direction = choisirDirection(positionsX1[0], positionsY1[0], *direction, cible[0], cible[1]);
 }
 /*!
  \fn int checkAKeyPress()
@@ -352,38 +348,46 @@ void ajouterPomme(int indice)
 }
 
 /*!
- \fn void genererSerpent(int positionsX[TAILLE_SERPENT], int positionsY[TAILLE_SERPENT], int x, int y)
+ \fn void genererSerpent(int positionsX1[TAILLE_SERPENT], int positionsY1[TAILLE_SERPENT], int x, int y)
  \brief La fonction qui génère le serpent
- \param positionsX La liste des positionsX du serpent
- \param positionsY La liste des positionsY du serpent
+ \param positionsX1 La liste des positionsX1 du serpent
+ \param positionsY1 La liste des positionsY1 du serpent
  \param x Le X de la tête du serpent
  \param y Le Y de la tête du serpent
 
- Cette fonction créé la liste des positions (positionsX, positionsY) du serpent dans la liste en argument en utilisant x et y
+ Cette fonction créé la liste des positions (positionsX1, positionsY1) du serpent dans la liste en argument en utilisant x et y
 */
-void genererSerpent(int positionsX[TAILLE_MAX_SERPENT], int positionsY[TAILLE_MAX_SERPENT], int x, int y)
+void genererSerpent(int positionsX1[TAILLE_MAX_SERPENT], int positionsY1[TAILLE_MAX_SERPENT], int x, int y, char direction)
 {
 	for (int nbCellule = 0; nbCellule < TAILLE_MAX_SERPENT; nbCellule++) // Génerer des coordonées de x à (x + TAILLE_SERPENT) pour le serpent
 	{
-		positionsX[nbCellule] = x - nbCellule;
-		positionsY[nbCellule] = y;
+		if(direction == TOUCHE_DROITE)
+		{
+			positionsX1[nbCellule] = x - nbCellule;
+			positionsY1[nbCellule] = y;
+		}
+		else if(direction == TOUCHE_GAUCHE)
+		{
+			positionsX1[nbCellule] = x + nbCellule;
+			positionsY1[nbCellule] = y;
+		}
 	}
 }
 
 /*!
- \fn void serpentDansTab(int positionsX[TAILLE_SERPENT], int positionsY[TAILLE_SERPENT])
+ \fn void serpentDansTab(int positionsX1[TAILLE_SERPENT], int positionsY1[TAILLE_SERPENT])
  \brief La fonction qui met les positions du serpent dans le tableau de jeu
- \param positionsX La liste des positionsX du serpent
- \param positionsY La liste des positionsY du serpent
+ \param positionsX1 La liste des positionsX1 du serpent
+ \param positionsY1 La liste des positionsY1 du serpent
 
- Cette fonction transfère toutes les positions du serpent (positionsX et positionsY) dans le tableau de jeu
+ Cette fonction transfère toutes les positions du serpent (positionsX1 et positionsY1) dans le tableau de jeu
 */
-void serpentDansTab(int positionsX[TAILLE_MAX_SERPENT], int positionsY[TAILLE_MAX_SERPENT])
+void serpentDansTab(int positionsX1[TAILLE_MAX_SERPENT], int positionsY1[TAILLE_MAX_SERPENT])
 {
 	for (int iDessine = 0; iDessine < tailleSerpent; iDessine++)
 	{
-		int aDessinerX = positionsX[iDessine];
-		int aDessinerY = positionsY[iDessine];
+		int aDessinerX = positionsX1[iDessine];
+		int aDessinerY = positionsY1[iDessine];
 
 		// Vérifier que les coordonnées sont dans les limites de l'écran
 		if (aDessinerX >= 0 && aDessinerX < TAILLE_TABLEAU_X &&
@@ -418,17 +422,17 @@ void genererTrous()
 }
 
 /*!
- \fn void progresser(int positionsX[TAILLE_SERPENT], int positionsY[TAILLE_SERPENT], char direction)
+ \fn void progresser(int positionsX1[TAILLE_SERPENT], int positionsY1[TAILLE_SERPENT], char direction)
  \brief La fonction qui fait avancer le jeu d'une étape
- \param positionsX La liste des positions X du serpent
- \param positionsY La liste des positions Y du serpent
+ \param positionsX1 La liste des positions X du serpent
+ \param positionsY1 La liste des positions Y du serpent
  \param direction La direction dans laquelle le serpent avance
 
  La fonction qui fait avancer le corps du serpent, puis bouge la tête dans la direction dans laquelle elle est sensée avancer
 */
-void progresser(int positionsX[TAILLE_MAX_SERPENT], int positionsY[TAILLE_MAX_SERPENT], char direction, bool* detecCollision) {
-    int nouveauX = positionsX[0];
-    int nouveauY = positionsY[0];
+void progresser(int positionsX1[TAILLE_MAX_SERPENT], int positionsY1[TAILLE_MAX_SERPENT], char direction, bool* detecCollision) {
+    int nouveauX = positionsX1[0];
+    int nouveauY = positionsY1[0];
 
     // Calcul de la nouvelle position
     switch (direction) {
@@ -469,11 +473,11 @@ void progresser(int positionsX[TAILLE_MAX_SERPENT], int positionsY[TAILLE_MAX_SE
 
     // Déplacement du serpent
     for (int i = tailleSerpent - 1; i > 0; i--) {
-        positionsX[i] = positionsX[i - 1];
-        positionsY[i] = positionsY[i - 1];
+        positionsX1[i] = positionsX1[i - 1];
+        positionsY1[i] = positionsY1[i - 1];
     }
-    positionsX[0] = nouveauX;
-    positionsY[0] = nouveauY;
+    positionsX1[0] = nouveauX;
+    positionsY1[0] = nouveauY;
 	nbrMouvements++;
 }
 
@@ -731,10 +735,10 @@ char choisirDirection(int xTete, int yTete, char directionActuelle, int cibleX, 
 }
 
 // Cette fonction détermine la cible vers laquelle le serpent doit se diriger, en tenant compte des trous
-void determinerCible(int cible[2], int positionsX[TAILLE_MAX_SERPENT], int positionsY[TAILLE_MAX_SERPENT])
+void determinerCible(int cible[2], int positionsX1[TAILLE_MAX_SERPENT], int positionsY1[TAILLE_MAX_SERPENT])
 {
-	int xTeteSerpent = positionsX[0];
-	int yTeteSerpent = positionsY[0];
+	int xTeteSerpent = positionsX1[0];
+	int yTeteSerpent = positionsY1[0];
 
 	int distanceDirecte = distanceCarree(xTeteSerpent, yTeteSerpent, pommeDetecX, pommeDetecY);
 
