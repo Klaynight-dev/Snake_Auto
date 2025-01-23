@@ -91,13 +91,25 @@
  * \def X_DEBUT
  * \brief La position horizontale à laquelle le serpent doit démarrer
  */
-#define X_DEBUT 40
+#define X_DEBUT_1 40
 
 /**
  * \def Y_DEBUT
  * \brief La position horizontale à laquelle le serpent doit démarrer
  */
-#define Y_DEBUT 20
+#define Y_DEBUT_1 13
+
+/**
+ * \def X_DEBUT
+ * \brief La position horizontale à laquelle le serpent doit démarrer
+ */
+#define X_DEBUT_2 40
+
+/**
+ * \def Y_DEBUT
+ * \brief La position horizontale à laquelle le serpent doit démarrer
+ */
+#define Y_DEBUT_2 27
 
 /**
  * \def NOMBRE_PAVES

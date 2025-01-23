@@ -36,11 +36,21 @@
  */
 int main(int argc, char *argv[])
 {
+	// Si j'ai le temps et l'envie un jour je réécrirai ça plus simplement avec une classe Serpent (G)
 
+	// Serpent 1
 	int positionsX1[TAILLE_MAX_SERPENT];
 	int positionsY1[TAILLE_MAX_SERPENT];
 
 	char direction1 = DIRECTION_INITIALE;
+
+	// Serpent 2
+	int positionsX2[TAILLE_MAX_SERPENT];
+	int positionsY2[TAILLE_MAX_SERPENT];
+
+	char direction2 = DIRECTION_INITIALE;
+
+	// Variables globales
 	bool devraitQuitter = false;
 	bool aQuitte = false;
 	bool estMort = false;
@@ -77,11 +87,15 @@ int main(int argc, char *argv[])
 		}
 	}
 
-    genererSerpent(positionsX1, positionsY1, X_DEBUT, Y_DEBUT, TOUCHE_GAUCHE); // Générer le premier serpent
-    initPlateau();
+    genererSerpent(positionsX1, positionsY1, X_DEBUT_1, Y_DEBUT_1, TOUCHE_DROITE); // Générer le premier serpent
+	genererSerpent(positionsX2, positionsY2, X_DEBUT_2, Y_DEBUT_2, TOUCHE_GAUCHE); // Générer le deuxième serpent
 
-	serpentDansTab(positionsX1, positionsY1);
-	genererPaves(positionsX1, positionsY1);
+    initPlateau(); // Générer les bordures
+
+	serpentDansTab(positionsX1, positionsY1); // Recopier les positions du premier serpent dans le tableau
+	serpentDansTab(positionsX2, positionsY2); // Recopier les positions du deuxième serpent dans le tableau
+
+	genererPaves();
 	srand((unsigned int)time(NULL)); // Initialiser l'aléatoire
 
     dessinerPlateau(); // Afficher le tableau de jeu initial
@@ -114,14 +128,20 @@ int main(int argc, char *argv[])
             devraitQuitter = true; // Si la touche d'arrêt est pressée, quitter
         }
 		
-        changerDirection(&direction1, positionsX1, positionsY1); // Met à jour la direction du serpent
+        changerDirection(&direction1, positionsX1, positionsY1); // Met à jour la direction du premier serpent
+		changerDirection(&direction2, positionsX2, positionsY2); // Met à jour la direction du deuxième serpent
 
-        effacerSerpent(positionsX1, positionsY1); // Effacer le serpent avant de le déplacer
+        effacerSerpent(positionsX1, positionsY1); // Effacer le premier serpent avant de le déplacer
+        effacerSerpent(positionsX2, positionsY2); // Effacer le deuxième serpent avant de le déplacer
 
-		progresser(positionsX1, positionsY1, direction1, &estMort); // Faire avancer le serpent
+		progresser(positionsX1, positionsY1, direction1, &estMort); // Faire avancer le premier serpent
+		progresser(positionsX2, positionsY2, direction2, &estMort); // Faire avancer le deuxième serpent
 
-        // Met à jour l'état du serpent dans le tableau
-		serpentDansTab(positionsX1, positionsY1); 
+
+        // Met à jour l'état des serpents dans le tableau
+		serpentDansTab(positionsX1, positionsY1);
+		serpentDansTab(positionsX2, positionsY2); 
+
 
         dessinerPlateau(); // Redessiner le tableau de jeu avec le serpent mis à jour
 		detecterPomme(&pommeDetecX, &pommeDetecY);
