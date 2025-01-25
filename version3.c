@@ -9,7 +9,7 @@
   Afin de démarrer avec GCC sans erreur, il vous faut effectuer la commande si dessous : 
  -> gcc ./version3.c -o main -Wall -lm
  -> main -h | main -v | main -d | main -s | main -a | les paramètres sont optionnels et peuvent être combinés (ex : -ds)
-    Il permette : -h pour l'aide, -v pour la version, -d pour le mode debug, -s pour le mode speedrun, -a pour désactiver l'affichage
+    Ils permettent : -h pour l'aide, -v pour la version, -d pour le mode debug, -s pour le mode speedrun, -a pour désactiver l'affichage
 **/
 
 // Bibliotèques
